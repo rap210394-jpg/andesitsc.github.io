@@ -113,6 +113,10 @@
                             <i class="fas fa-sync-alt mr-1"></i>
                             Sync Drive
                         </button>
+                        <button onclick="document.getElementById('driveSetupModal').classList.remove('hidden')" class="flex items-center px-3 py-1 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition duration-200 text-sm">
+                            <i class="fas fa-cog mr-1"></i>
+                            Setup
+                        </button>
                         <div id="driveStatus" class="text-xs text-gray-500">
                             <i class="fas fa-cloud mr-1"></i>
                             Connecting...
@@ -695,66 +699,112 @@
 
     <!-- Google Drive Setup Instructions Modal -->
     <div id="driveSetupModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-lg p-6 w-96 max-w-md mx-4 max-h-96 overflow-y-auto">
+        <div class="bg-white rounded-lg p-6 w-full max-w-4xl mx-4 max-h-96 overflow-y-auto">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold text-gray-800">Setup Google Drive</h3>
+                <h3 class="text-xl font-bold text-gray-800">🚀 Setup Google Drive untuk GitHub Pages</h3>
                 <button onclick="closeDriveSetupModal()" class="text-gray-500 hover:text-gray-700">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            <div class="space-y-4">
-                <div class="bg-blue-50 p-4 rounded-lg">
-                    <h4 class="font-semibold text-blue-800 mb-2">📁 Folder Google Drive:</h4>
-                    <div class="text-sm text-blue-700 space-y-2">
-                        <p><strong>Target Folder:</strong> <a href="https://drive.google.com/drive/folders/167Z7UsWjeMOxHgNcyuOqyGx1US7ORHrg" target="_blank" class="underline">Folder Google Drive Anda</a></p>
-                        <p><strong>Akun:</strong> rap210394@gmail.com</p>
-                        <p><strong>File Data:</strong> andesit_data.json</p>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Left Column -->
+                <div class="space-y-4">
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <h4 class="font-semibold text-blue-800 mb-2">📁 Target Google Drive:</h4>
+                        <div class="text-sm text-blue-700 space-y-2">
+                            <p><strong>Folder:</strong> <a href="https://drive.google.com/drive/folders/167Z7UsWjeMOxHgNcyuOqyGx1US7ORHrg" target="_blank" class="underline">Folder Google Drive Anda</a></p>
+                            <p><strong>Akun:</strong> rap210394@gmail.com</p>
+                            <p><strong>File Data:</strong> andesit_data.json</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-green-50 p-4 rounded-lg">
+                        <h4 class="font-semibold text-green-800 mb-2">🔧 Langkah Setup Google Cloud:</h4>
+                        <ol class="text-sm text-green-700 space-y-2 list-decimal list-inside">
+                            <li>Buka <a href="https://console.cloud.google.com" target="_blank" class="underline font-medium">Google Cloud Console</a></li>
+                            <li>Buat project baru: "ANDESIT Swimming Club"</li>
+                            <li>Enable <strong>Google Drive API</strong></li>
+                            <li>Buat <strong>OAuth 2.0 Client ID</strong> credentials</li>
+                            <li>Tambahkan domain GitHub Pages ke <strong>Authorized JavaScript origins</strong></li>
+                            <li>Copy <strong>Client ID</strong> dan <strong>API Key</strong></li>
+                        </ol>
+                    </div>
+                    
+                    <div class="bg-purple-50 p-4 rounded-lg">
+                        <h4 class="font-semibold text-purple-800 mb-2">🌐 Domain GitHub Pages:</h4>
+                        <div class="text-sm text-purple-700 space-y-2">
+                            <p><strong>Format:</strong> https://USERNAME.github.io/REPOSITORY</p>
+                            <p><strong>Contoh:</strong> https://johndoe.github.io/andesit-swimming</p>
+                            <p class="text-xs">Ganti USERNAME dan REPOSITORY sesuai GitHub Anda</p>
+                        </div>
                     </div>
                 </div>
-                <div class="bg-green-50 p-4 rounded-lg">
-                    <h4 class="font-semibold text-green-800 mb-2">📋 Langkah Setup:</h4>
-                    <ol class="text-sm text-green-700 space-y-2 list-decimal list-inside">
-                        <li>Buka <a href="https://console.cloud.google.com" target="_blank" class="underline">Google Cloud Console</a></li>
-                        <li>Buat project baru atau pilih project existing</li>
-                        <li>Enable Google Drive API</li>
-                        <li>Buat credentials (OAuth 2.0 Client ID)</li>
-                        <li>Tambahkan domain ini ke authorized origins</li>
-                        <li>Copy Client ID dan API Key ke kode</li>
-                    </ol>
-                </div>
-                <div class="bg-yellow-50 p-4 rounded-lg">
-                    <h4 class="font-semibold text-yellow-800 mb-2">⚠️ Catatan Penting:</h4>
-                    <p class="text-sm text-yellow-700">
-                        Untuk keamanan, credentials Google Drive perlu dikonfigurasi oleh developer. 
-                        Saat ini sistem menggunakan penyimpanan lokal sebagai fallback.
-                    </p>
-                </div>
-                <div class="bg-green-50 p-4 rounded-lg">
-                    <h4 class="font-semibold text-green-800 mb-2">✅ Status Saat Ini:</h4>
-                    <p class="text-sm text-green-700">
-                        Data tersimpan di browser dan akan sync otomatis ketika Google Drive dikonfigurasi.
-                    </p>
+                
+                <!-- Right Column -->
+                <div class="space-y-4">
+                    <div class="bg-yellow-50 p-4 rounded-lg">
+                        <h4 class="font-semibold text-yellow-800 mb-2">⚙️ Konfigurasi Kode:</h4>
+                        <div class="text-sm text-yellow-700 space-y-2">
+                            <p><strong>1. Edit file HTML di GitHub:</strong></p>
+                            <div class="bg-gray-800 text-green-400 p-2 rounded text-xs font-mono">
+                                CLIENT_ID: 'YOUR_CLIENT_ID_HERE'<br>
+                                API_KEY: 'YOUR_API_KEY_HERE'<br>
+                                GITHUB_DOMAIN: 'https://YOUR_DOMAIN'
+                            </div>
+                            <p><strong>2. Commit dan push ke GitHub</strong></p>
+                            <p><strong>3. Aktifkan GitHub Pages di Settings</strong></p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-red-50 p-4 rounded-lg">
+                        <h4 class="font-semibold text-red-800 mb-2">🔒 Authorized JavaScript Origins:</h4>
+                        <div class="text-sm text-red-700 space-y-2">
+                            <p>Tambahkan domain ini di Google Cloud Console:</p>
+                            <div class="bg-gray-800 text-green-400 p-2 rounded text-xs font-mono">
+                                https://YOUR_USERNAME.github.io
+                            </div>
+                            <p class="text-xs">Tanpa path repository, hanya domain utama</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-green-50 p-4 rounded-lg">
+                        <h4 class="font-semibold text-green-800 mb-2">✅ Setelah Setup:</h4>
+                        <ul class="text-sm text-green-700 space-y-1 list-disc list-inside">
+                            <li>Data otomatis sync ke Google Drive</li>
+                            <li>Akses dari mana saja dengan akun Google</li>
+                            <li>Backup otomatis setiap perubahan</li>
+                            <li>Multi-device synchronization</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
-            <div class="mt-6">
-                <button onclick="closeDriveSetupModal()" class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-200">
-                    Mengerti
+            
+            <div class="mt-6 flex space-x-3">
+                <button onclick="openGoogleCloudConsole()" class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-200">
+                    <i class="fas fa-external-link-alt mr-2"></i>
+                    Buka Google Cloud Console
+                </button>
+                <button onclick="closeDriveSetupModal()" class="flex-1 bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600 transition duration-200">
+                    Tutup
                 </button>
             </div>
         </div>
     </div>
 
     <script>
-        // Google Drive API Configuration
+        // Google Drive API Configuration for GitHub Pages
         const GOOGLE_DRIVE_CONFIG = {
-            CLIENT_ID: '1234567890-abcdefghijklmnopqrstuvwxyz123456.apps.googleusercontent.com',
-            API_KEY: 'AIzaSyABCDEFGHIJKLMNOPQRSTUVWXYZ1234567',
+            // These need to be configured in Google Cloud Console
+            CLIENT_ID: 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com',
+            API_KEY: 'YOUR_GOOGLE_API_KEY',
             DISCOVERY_DOC: 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest',
             SCOPES: 'https://www.googleapis.com/auth/drive.file',
             FOLDER_ID: '167Z7UsWjeMOxHgNcyuOqyGx1US7ORHrg', // Your specific Google Drive folder
             FOLDER_NAME: 'ANDESIT Swimming Club Data',
             FILE_NAME: 'andesit_data.json',
-            USER_EMAIL: 'rap210394@gmail.com'
+            USER_EMAIL: 'rap210394@gmail.com',
+            // GitHub Pages domain configuration
+            GITHUB_DOMAIN: 'https://YOUR_USERNAME.github.io/YOUR_REPOSITORY_NAME'
         };
 
         // Google Drive API variables
@@ -1059,12 +1109,12 @@
 
         // Initialize storage and load data
         async function initializeStorage() {
-            showNotification('🔄 Menginisialisasi Google Drive...', 'info');
+            showNotification('🔄 Menginisialisasi sistem penyimpanan...', 'info');
             
             // Initialize Google Drive API first
             await initializeGoogleDrive();
             
-            showNotification('📁 Memuat data dari Google Drive...', 'info');
+            showNotification('📁 Memuat data...', 'info');
             
             try {
                 // Always try to load from cloud first
@@ -2319,6 +2369,10 @@
             document.getElementById('driveSetupModal').classList.add('hidden');
         }
 
+        function openGoogleCloudConsole() {
+            window.open('https://console.cloud.google.com', '_blank');
+        }
+
         document.getElementById('eventForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
@@ -2397,5 +2451,5 @@
         // Data will be initialized after login
         // Dashboard will be loaded after successful login
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9727c982d267dfb7',t:'MTc1NTc1NDczNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9727d559941a40de',t:'MTc1NTc1NTIyMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
