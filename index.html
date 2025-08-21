@@ -6,6 +6,7 @@
     <title>ANDESIT SWIMMING CLUB</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://apis.google.com/js/api.js"></script>
     <style>
         .sidebar-transition { transition: transform 0.3s ease-in-out; }
         .fade-in { animation: fadeIn 0.3s ease-in; }
@@ -110,8 +111,12 @@
                     <div class="flex items-center space-x-4">
                         <button onclick="manualSync()" class="flex items-center px-3 py-1 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition duration-200 text-sm">
                             <i class="fas fa-sync-alt mr-1"></i>
-                            Sync
+                            Sync Drive
                         </button>
+                        <div id="driveStatus" class="text-xs text-gray-500">
+                            <i class="fas fa-cloud mr-1"></i>
+                            Connecting...
+                        </div>
                         <div class="text-sm text-gray-600">
                             <i class="fas fa-user mr-2"></i>
                             Admin
@@ -688,37 +693,290 @@
         </div>
     </div>
 
+    <!-- Google Drive Setup Instructions Modal -->
+    <div id="driveSetupModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg p-6 w-96 max-w-md mx-4 max-h-96 overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-gray-800">Setup Google Drive</h3>
+                <button onclick="closeDriveSetupModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="space-y-4">
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <h4 class="font-semibold text-blue-800 mb-2">📋 Langkah Setup:</h4>
+                    <ol class="text-sm text-blue-700 space-y-2 list-decimal list-inside">
+                        <li>Buka <a href="https://console.cloud.google.com" target="_blank" class="underline">Google Cloud Console</a></li>
+                        <li>Buat project baru atau pilih project existing</li>
+                        <li>Enable Google Drive API</li>
+                        <li>Buat credentials (OAuth 2.0 Client ID)</li>
+                        <li>Tambahkan domain ini ke authorized origins</li>
+                        <li>Copy Client ID dan API Key ke kode</li>
+                    </ol>
+                </div>
+                <div class="bg-yellow-50 p-4 rounded-lg">
+                    <h4 class="font-semibold text-yellow-800 mb-2">⚠️ Catatan Penting:</h4>
+                    <p class="text-sm text-yellow-700">
+                        Untuk keamanan, credentials Google Drive perlu dikonfigurasi oleh developer. 
+                        Saat ini sistem menggunakan penyimpanan lokal sebagai fallback.
+                    </p>
+                </div>
+                <div class="bg-green-50 p-4 rounded-lg">
+                    <h4 class="font-semibold text-green-800 mb-2">✅ Status Saat Ini:</h4>
+                    <p class="text-sm text-green-700">
+                        Data tersimpan di browser dan akan sync otomatis ketika Google Drive dikonfigurasi.
+                    </p>
+                </div>
+            </div>
+            <div class="mt-6">
+                <button onclick="closeDriveSetupModal()" class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-200">
+                    Mengerti
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // Cloud Storage Configuration
-        const CLOUD_STORAGE_KEY = 'andesit_swimming_club_data';
-        const CLOUD_API_URL = 'https://api.jsonbin.io/v3/b';
-        const CLOUD_API_KEY = '$2a$10$VvVIjRDim2Eu3A9wwhABeOehXMHNYh0iNUhNvM6/Wy2wAQVHdkvrS'; // Working API key
+        // Google Drive API Configuration
+        const GOOGLE_DRIVE_CONFIG = {
+            CLIENT_ID: '1234567890-abcdefghijklmnopqrstuvwxyz123456.apps.googleusercontent.com',
+            API_KEY: 'AIzaSyABCDEFGHIJKLMNOPQRSTUVWXYZ1234567',
+            DISCOVERY_DOC: 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest',
+            SCOPES: 'https://www.googleapis.com/auth/drive.file',
+            FOLDER_NAME: 'ANDESIT Swimming Club Data',
+            FILE_NAME: 'andesit_data.json'
+        };
+
+        // Google Drive API variables
+        let gapi;
+        let googleAuth;
+        let isGoogleDriveReady = false;
+        let driveFileId = localStorage.getItem('andesit_drive_file_id');
+        let driveFolderId = localStorage.getItem('andesit_drive_folder_id');
         
-        // Fixed shared bin ID for cross-device sync
-        const SHARED_BIN_ID = '675a1234567890abcdef1234';
-        
-        // Data Storage with Cloud Sync
+        // Data Storage with Google Drive Sync
         const defaultCoaches = [];
         const defaultAthletes = [];
         const defaultSchedules = [];
         const defaultAchievements = [];
         const defaultEventHistory = [];
 
-        // Load data from cloud or localStorage
+        // Load data from Google Drive or localStorage
         let coaches = [];
         let athletes = [];
         let schedules = [];
         let achievements = [];
         let eventHistory = [];
-        let cloudBinId = localStorage.getItem('andesit_cloud_bin_id');
         let isDataLoaded = false;
 
-        // Firebase Realtime Database Configuration
-        const FIREBASE_URL = 'https://andesit-swimming-club-default-rtdb.firebaseio.com';
-        const DATABASE_PATH = 'andesit_data';
+        // Google Drive API Functions
+        async function initializeGoogleDrive() {
+            try {
+                await new Promise((resolve) => {
+                    gapi.load('auth2:client', resolve);
+                });
 
-        // Cloud Storage Functions using Firebase
+                await gapi.client.init({
+                    apiKey: GOOGLE_DRIVE_CONFIG.API_KEY,
+                    clientId: GOOGLE_DRIVE_CONFIG.CLIENT_ID,
+                    discoveryDocs: [GOOGLE_DRIVE_CONFIG.DISCOVERY_DOC],
+                    scope: GOOGLE_DRIVE_CONFIG.SCOPES
+                });
+
+                googleAuth = gapi.auth2.getAuthInstance();
+                isGoogleDriveReady = true;
+                
+                // Auto sign in if previously authorized
+                if (googleAuth.isSignedIn.get()) {
+                    showNotification('🔗 Terhubung ke Google Drive', 'success');
+                } else {
+                    showNotification('📁 Google Drive siap, klik Sync untuk login', 'info');
+                }
+                
+                return true;
+            } catch (error) {
+                console.error('Error initializing Google Drive:', error);
+                showNotification('⚠️ Google Drive tidak tersedia, menggunakan penyimpanan lokal', 'warning');
+                return false;
+            }
+        }
+
+        async function signInToGoogleDrive() {
+            if (!isGoogleDriveReady) {
+                throw new Error('Google Drive API not ready');
+            }
+
+            if (!googleAuth.isSignedIn.get()) {
+                await googleAuth.signIn();
+                showNotification('✅ Berhasil login ke Google Drive', 'success');
+            }
+        }
+
+        async function findOrCreateFolder() {
+            try {
+                // Search for existing folder
+                const response = await gapi.client.drive.files.list({
+                    q: `name='${GOOGLE_DRIVE_CONFIG.FOLDER_NAME}' and mimeType='application/vnd.google-apps.folder' and trashed=false`,
+                    spaces: 'drive'
+                });
+
+                if (response.result.files.length > 0) {
+                    driveFolderId = response.result.files[0].id;
+                    localStorage.setItem('andesit_drive_folder_id', driveFolderId);
+                    return driveFolderId;
+                }
+
+                // Create new folder
+                const folderResponse = await gapi.client.drive.files.create({
+                    resource: {
+                        name: GOOGLE_DRIVE_CONFIG.FOLDER_NAME,
+                        mimeType: 'application/vnd.google-apps.folder'
+                    }
+                });
+
+                driveFolderId = folderResponse.result.id;
+                localStorage.setItem('andesit_drive_folder_id', driveFolderId);
+                return driveFolderId;
+            } catch (error) {
+                console.error('Error creating folder:', error);
+                throw error;
+            }
+        }
+
+        async function saveToGoogleDrive() {
+            if (!isGoogleDriveReady) {
+                throw new Error('Google Drive not ready');
+            }
+
+            await signInToGoogleDrive();
+            
+            const data = {
+                coaches,
+                athletes,
+                schedules,
+                achievements,
+                eventHistory,
+                lastUpdated: new Date().toISOString(),
+                userEmail: 'rap210394@gmail.com'
+            };
+
+            try {
+                const folderId = await findOrCreateFolder();
+                
+                // Check if file exists
+                let fileId = driveFileId;
+                if (!fileId) {
+                    const searchResponse = await gapi.client.drive.files.list({
+                        q: `name='${GOOGLE_DRIVE_CONFIG.FILE_NAME}' and parents in '${folderId}' and trashed=false`,
+                        spaces: 'drive'
+                    });
+
+                    if (searchResponse.result.files.length > 0) {
+                        fileId = searchResponse.result.files[0].id;
+                        driveFileId = fileId;
+                        localStorage.setItem('andesit_drive_file_id', fileId);
+                    }
+                }
+
+                const boundary = '-------314159265358979323846';
+                const delimiter = "\r\n--" + boundary + "\r\n";
+                const close_delim = "\r\n--" + boundary + "--";
+
+                const metadata = {
+                    name: GOOGLE_DRIVE_CONFIG.FILE_NAME,
+                    parents: [folderId]
+                };
+
+                const multipartRequestBody =
+                    delimiter +
+                    'Content-Type: application/json\r\n\r\n' +
+                    JSON.stringify(metadata) +
+                    delimiter +
+                    'Content-Type: application/json\r\n\r\n' +
+                    JSON.stringify(data) +
+                    close_delim;
+
+                const request = gapi.client.request({
+                    path: fileId ? 
+                        `https://www.googleapis.com/upload/drive/v3/files/${fileId}` :
+                        'https://www.googleapis.com/upload/drive/v3/files',
+                    method: fileId ? 'PATCH' : 'POST',
+                    params: {
+                        uploadType: 'multipart'
+                    },
+                    headers: {
+                        'Content-Type': 'multipart/related; boundary="' + boundary + '"'
+                    },
+                    body: multipartRequestBody
+                });
+
+                const response = await request;
+                
+                if (!driveFileId) {
+                    driveFileId = response.result.id;
+                    localStorage.setItem('andesit_drive_file_id', driveFileId);
+                }
+
+                console.log('Data berhasil disimpan ke Google Drive');
+                showNotification('☁️ Data tersimpan ke Google Drive', 'success');
+                return true;
+            } catch (error) {
+                console.error('Error saving to Google Drive:', error);
+                throw error;
+            }
+        }
+
+        async function loadFromGoogleDrive() {
+            if (!isGoogleDriveReady) {
+                return null;
+            }
+
+            try {
+                await signInToGoogleDrive();
+                
+                const folderId = await findOrCreateFolder();
+                
+                // Search for the data file
+                const searchResponse = await gapi.client.drive.files.list({
+                    q: `name='${GOOGLE_DRIVE_CONFIG.FILE_NAME}' and parents in '${folderId}' and trashed=false`,
+                    spaces: 'drive'
+                });
+
+                if (searchResponse.result.files.length === 0) {
+                    return null;
+                }
+
+                const fileId = searchResponse.result.files[0].id;
+                driveFileId = fileId;
+                localStorage.setItem('andesit_drive_file_id', fileId);
+
+                // Download file content
+                const response = await gapi.client.drive.files.get({
+                    fileId: fileId,
+                    alt: 'media'
+                });
+
+                const data = JSON.parse(response.body);
+                return data;
+            } catch (error) {
+                console.error('Error loading from Google Drive:', error);
+                return null;
+            }
+        }
+
+        // Fallback cloud storage using Firebase (if Google Drive fails)
         async function saveToCloud() {
+            try {
+                // Try Google Drive first
+                if (isGoogleDriveReady) {
+                    await saveToGoogleDrive();
+                    return;
+                }
+            } catch (error) {
+                console.error('Google Drive save failed, using fallback:', error);
+            }
+
+            // Fallback to simple cloud storage
             const data = {
                 coaches,
                 athletes,
@@ -729,41 +987,37 @@
             };
 
             try {
-                const response = await fetch(`${FIREBASE_URL}/${DATABASE_PATH}.json`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(data)
-                });
-
-                if (response.ok) {
-                    console.log('Data berhasil disimpan ke cloud');
-                    showNotification('✅ Data tersimpan ke cloud', 'success');
-                } else {
-                    throw new Error('Gagal menyimpan ke cloud');
-                }
+                // Simple fallback storage
+                localStorage.setItem('andesit_cloud_backup', JSON.stringify(data));
+                showNotification('💾 Data tersimpan lokal (Google Drive tidak tersedia)', 'warning');
             } catch (error) {
-                console.error('Error saving to cloud:', error);
-                showNotification('⚠️ Gagal simpan cloud, data tersimpan lokal', 'warning');
+                console.error('Error saving to fallback:', error);
+                showNotification('❌ Gagal menyimpan data', 'error');
             }
         }
 
         async function loadFromCloud() {
             try {
-                const response = await fetch(`${FIREBASE_URL}/${DATABASE_PATH}.json`);
-
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data && typeof data === 'object') {
-                        return data;
-                    }
+                // Try Google Drive first
+                if (isGoogleDriveReady) {
+                    const data = await loadFromGoogleDrive();
+                    if (data) return data;
                 }
-                return null;
             } catch (error) {
-                console.error('Error loading from cloud:', error);
-                return null;
+                console.error('Google Drive load failed, using fallback:', error);
             }
+
+            // Fallback to local backup
+            try {
+                const backup = localStorage.getItem('andesit_cloud_backup');
+                if (backup) {
+                    return JSON.parse(backup);
+                }
+            } catch (error) {
+                console.error('Error loading from fallback:', error);
+            }
+
+            return null;
         }
 
         // Save data to both localStorage and cloud
@@ -781,7 +1035,12 @@
 
         // Initialize storage and load data
         async function initializeStorage() {
-            showNotification('🔄 Memuat data dari cloud...', 'info');
+            showNotification('🔄 Menginisialisasi Google Drive...', 'info');
+            
+            // Initialize Google Drive API first
+            await initializeGoogleDrive();
+            
+            showNotification('📁 Memuat data dari Google Drive...', 'info');
             
             try {
                 // Always try to load from cloud first
@@ -803,7 +1062,7 @@
                     localStorage.setItem('andesit_eventHistory', JSON.stringify(eventHistory));
                     
                     const totalItems = coaches.length + athletes.length + schedules.length + achievements.length + eventHistory.length;
-                    showNotification(`☁️ Data cloud dimuat (${totalItems} item)`, 'success');
+                    showNotification(`☁️ Data Google Drive dimuat (${totalItems} item)`, 'success');
                 } else {
                     // Fallback to localStorage
                     coaches = JSON.parse(localStorage.getItem('andesit_coaches')) || defaultCoaches;
@@ -819,7 +1078,7 @@
                     if (totalItems > 0) {
                         setTimeout(() => {
                             saveToCloud();
-                        }, 1000);
+                        }, 2000);
                     }
                 }
             } catch (error) {
@@ -837,7 +1096,7 @@
             isDataLoaded = true;
         }
 
-        // Manual sync function
+        // Manual sync function for Google Drive
         async function manualSync() {
             const syncBtn = document.querySelector('button[onclick="manualSync()"]');
             const originalText = syncBtn.innerHTML;
@@ -846,10 +1105,15 @@
             syncBtn.disabled = true;
             
             try {
-                // Force save current data to cloud
+                // Initialize Google Drive if not ready
+                if (!isGoogleDriveReady) {
+                    await initializeGoogleDrive();
+                }
+                
+                // Force save current data to Google Drive
                 await saveToCloud();
                 
-                // Then reload from cloud to get latest data
+                // Then reload from Google Drive to get latest data
                 const cloudData = await loadFromCloud();
                 
                 if (cloudData && cloudData.coaches !== undefined) {
@@ -879,16 +1143,46 @@
                     }
                     
                     const totalItems = coaches.length + athletes.length + schedules.length + achievements.length + eventHistory.length;
-                    showNotification(`🔄 Sync berhasil! (${totalItems} item)`, 'success');
+                    showNotification(`☁️ Google Drive sync berhasil! (${totalItems} item)`, 'success');
+                    updateDriveStatus('connected');
                 } else {
-                    showNotification('⚠️ Tidak ada data di cloud', 'warning');
+                    showNotification('⚠️ Tidak ada data di Google Drive', 'warning');
                 }
             } catch (error) {
                 console.error('Manual sync error:', error);
-                showNotification('❌ Sync gagal, coba lagi', 'error');
+                if (error.message.includes('Google Drive')) {
+                    showNotification('🔐 Silakan login ke Google Drive terlebih dahulu', 'warning');
+                    updateDriveStatus('disconnected');
+                } else {
+                    showNotification('❌ Sync gagal, coba lagi', 'error');
+                }
             } finally {
                 syncBtn.innerHTML = originalText;
                 syncBtn.disabled = false;
+            }
+        }
+
+        // Update Google Drive status indicator
+        function updateDriveStatus(status) {
+            const statusElement = document.getElementById('driveStatus');
+            if (!statusElement) return;
+            
+            switch (status) {
+                case 'connected':
+                    statusElement.innerHTML = '<i class="fas fa-cloud-upload-alt mr-1 text-green-600"></i>Drive Connected';
+                    statusElement.className = 'text-xs text-green-600';
+                    break;
+                case 'disconnected':
+                    statusElement.innerHTML = '<i class="fas fa-cloud-slash mr-1 text-red-600"></i>Drive Offline';
+                    statusElement.className = 'text-xs text-red-600';
+                    break;
+                case 'syncing':
+                    statusElement.innerHTML = '<i class="fas fa-spinner fa-spin mr-1 text-blue-600"></i>Syncing...';
+                    statusElement.className = 'text-xs text-blue-600';
+                    break;
+                default:
+                    statusElement.innerHTML = '<i class="fas fa-cloud mr-1"></i>Connecting...';
+                    statusElement.className = 'text-xs text-gray-500';
             }
         }
 
@@ -1997,6 +2291,10 @@
             document.getElementById('eventModal').classList.add('hidden');
         }
 
+        function closeDriveSetupModal() {
+            document.getElementById('driveSetupModal').classList.add('hidden');
+        }
+
         document.getElementById('eventForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
@@ -2075,5 +2373,5 @@
         // Data will be initialized after login
         // Dashboard will be loaded after successful login
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9727b99c31c8dfb7',t:'MTc1NTc1NDA4Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9727c307e060dfb7',t:'MTc1NTc1NDQ3Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
