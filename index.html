@@ -683,46 +683,214 @@
     </div>
 
     <script>
-        // Data Storage with Local Storage
+        // Cloud Storage Configuration
+        const CLOUD_STORAGE_KEY = 'andesit_swimming_club_data';
+        const CLOUD_API_URL = 'https://api.jsonbin.io/v3/b';
+        const CLOUD_API_KEY = '$2a$10$9vKzqGqNqKqNqKqNqKqNqOeKqNqKqNqKqNqKqNqKqNqKqNqKqNqK'; // Demo key
+        
+        // Data Storage with Cloud Sync
         const defaultCoaches = [];
         const defaultAthletes = [];
         const defaultSchedules = [];
         const defaultAchievements = [];
         const defaultEventHistory = [];
 
-        // Load data from localStorage or use defaults
-        let coaches = JSON.parse(localStorage.getItem('andesit_coaches')) || defaultCoaches;
-        let athletes = JSON.parse(localStorage.getItem('andesit_athletes')) || defaultAthletes;
-        let schedules = JSON.parse(localStorage.getItem('andesit_schedules')) || defaultSchedules;
-        let achievements = JSON.parse(localStorage.getItem('andesit_achievements')) || defaultAchievements;
-        let eventHistory = JSON.parse(localStorage.getItem('andesit_eventHistory')) || defaultEventHistory;
+        // Load data from cloud or localStorage
+        let coaches = [];
+        let athletes = [];
+        let schedules = [];
+        let achievements = [];
+        let eventHistory = [];
+        let cloudBinId = localStorage.getItem('andesit_cloud_bin_id');
+        let isDataLoaded = false;
 
-        // Save data to localStorage
-        function saveToStorage() {
+        // Cloud Storage Functions
+        async function saveToCloud() {
+            const data = {
+                coaches,
+                athletes,
+                schedules,
+                achievements,
+                eventHistory,
+                lastUpdated: new Date().toISOString()
+            };
+
+            try {
+                let response;
+                if (cloudBinId) {
+                    // Update existing bin
+                    response = await fetch(`${CLOUD_API_URL}/${cloudBinId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Master-Key': CLOUD_API_KEY
+                        },
+                        body: JSON.stringify(data)
+                    });
+                } else {
+                    // Create new bin
+                    response = await fetch(CLOUD_API_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Master-Key': CLOUD_API_KEY,
+                            'X-Bin-Name': 'Andesit Swimming Club Data'
+                        },
+                        body: JSON.stringify(data)
+                    });
+                    
+                    if (response.ok) {
+                        const result = await response.json();
+                        cloudBinId = result.metadata.id;
+                        localStorage.setItem('andesit_cloud_bin_id', cloudBinId);
+                    }
+                }
+
+                if (response.ok) {
+                    console.log('Data berhasil disimpan ke cloud');
+                    showNotification('Data berhasil disimpan ke cloud', 'success');
+                } else {
+                    throw new Error('Gagal menyimpan ke cloud');
+                }
+            } catch (error) {
+                console.error('Error saving to cloud:', error);
+                showNotification('Gagal menyimpan ke cloud, data tersimpan lokal', 'warning');
+            }
+        }
+
+        async function loadFromCloud() {
+            if (!cloudBinId) {
+                // Try to find existing data by searching
+                const searchData = await searchCloudData();
+                if (searchData) {
+                    return searchData;
+                }
+                return null;
+            }
+
+            try {
+                const response = await fetch(`${CLOUD_API_URL}/${cloudBinId}/latest`, {
+                    method: 'GET',
+                    headers: {
+                        'X-Master-Key': CLOUD_API_KEY
+                    }
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    return result.record;
+                } else {
+                    throw new Error('Gagal memuat dari cloud');
+                }
+            } catch (error) {
+                console.error('Error loading from cloud:', error);
+                return null;
+            }
+        }
+
+        async function searchCloudData() {
+            // This is a simplified approach - in a real app, you'd use proper authentication
+            // For demo purposes, we'll use a fixed bin ID that can be shared
+            const sharedBinId = '673d4f8fe41b4d34e4519c8a'; // Demo shared bin
+            
+            try {
+                const response = await fetch(`${CLOUD_API_URL}/${sharedBinId}/latest`, {
+                    method: 'GET',
+                    headers: {
+                        'X-Master-Key': CLOUD_API_KEY
+                    }
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    cloudBinId = sharedBinId;
+                    localStorage.setItem('andesit_cloud_bin_id', cloudBinId);
+                    return result.record;
+                }
+            } catch (error) {
+                console.error('Error searching cloud data:', error);
+            }
+            
+            return null;
+        }
+
+        // Save data to both localStorage and cloud
+        async function saveToStorage() {
+            // Save to localStorage first (immediate)
             localStorage.setItem('andesit_coaches', JSON.stringify(coaches));
             localStorage.setItem('andesit_athletes', JSON.stringify(athletes));
             localStorage.setItem('andesit_schedules', JSON.stringify(schedules));
             localStorage.setItem('andesit_achievements', JSON.stringify(achievements));
             localStorage.setItem('andesit_eventHistory', JSON.stringify(eventHistory));
+            
+            // Save to cloud (async)
+            await saveToCloud();
         }
 
-        // Initialize storage with default data if first time
-        function initializeStorage() {
-            if (!localStorage.getItem('andesit_coaches')) {
-                localStorage.setItem('andesit_coaches', JSON.stringify(defaultCoaches));
+        // Initialize storage and load data
+        async function initializeStorage() {
+            showNotification('Memuat data...', 'info');
+            
+            // Try to load from cloud first
+            const cloudData = await loadFromCloud();
+            
+            if (cloudData) {
+                // Use cloud data
+                coaches = cloudData.coaches || [];
+                athletes = cloudData.athletes || [];
+                schedules = cloudData.schedules || [];
+                achievements = cloudData.achievements || [];
+                eventHistory = cloudData.eventHistory || [];
+                
+                // Also save to localStorage as backup
+                localStorage.setItem('andesit_coaches', JSON.stringify(coaches));
+                localStorage.setItem('andesit_athletes', JSON.stringify(athletes));
+                localStorage.setItem('andesit_schedules', JSON.stringify(schedules));
+                localStorage.setItem('andesit_achievements', JSON.stringify(achievements));
+                localStorage.setItem('andesit_eventHistory', JSON.stringify(eventHistory));
+                
+                showNotification('Data berhasil dimuat dari cloud', 'success');
+            } else {
+                // Fallback to localStorage
+                coaches = JSON.parse(localStorage.getItem('andesit_coaches')) || defaultCoaches;
+                athletes = JSON.parse(localStorage.getItem('andesit_athletes')) || defaultAthletes;
+                schedules = JSON.parse(localStorage.getItem('andesit_schedules')) || defaultSchedules;
+                achievements = JSON.parse(localStorage.getItem('andesit_achievements')) || defaultAchievements;
+                eventHistory = JSON.parse(localStorage.getItem('andesit_eventHistory')) || defaultEventHistory;
+                
+                showNotification('Data dimuat dari penyimpanan lokal', 'info');
             }
-            if (!localStorage.getItem('andesit_athletes')) {
-                localStorage.setItem('andesit_athletes', JSON.stringify(defaultAthletes));
-            }
-            if (!localStorage.getItem('andesit_schedules')) {
-                localStorage.setItem('andesit_schedules', JSON.stringify(defaultSchedules));
-            }
-            if (!localStorage.getItem('andesit_achievements')) {
-                localStorage.setItem('andesit_achievements', JSON.stringify(defaultAchievements));
-            }
-            if (!localStorage.getItem('andesit_eventHistory')) {
-                localStorage.setItem('andesit_eventHistory', JSON.stringify(defaultEventHistory));
-            }
+            
+            isDataLoaded = true;
+        }
+
+        // Notification system
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg text-white text-sm max-w-sm ${
+                type === 'success' ? 'bg-green-500' :
+                type === 'error' ? 'bg-red-500' :
+                type === 'warning' ? 'bg-yellow-500' :
+                'bg-blue-500'
+            }`;
+            notification.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas ${
+                        type === 'success' ? 'fa-check-circle' :
+                        type === 'error' ? 'fa-exclamation-circle' :
+                        type === 'warning' ? 'fa-exclamation-triangle' :
+                        'fa-info-circle'
+                    } mr-2"></i>
+                    ${message}
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Auto remove after 3 seconds
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
         }
 
         // Utility Functions
@@ -772,7 +940,7 @@
         // Login System
         let userRole = 'admin'; // 'admin' or 'user'
         
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
@@ -781,12 +949,24 @@
                 userRole = 'admin';
                 document.getElementById('loginModal').classList.add('hidden');
                 document.getElementById('mainApp').classList.remove('hidden');
+                
+                // Initialize data first
+                if (!isDataLoaded) {
+                    await initializeStorage();
+                }
+                
                 setupUserInterface();
                 loadCoaches();
             } else if (username === 'user' && password === 'user') {
                 userRole = 'user';
                 document.getElementById('loginModal').classList.add('hidden');
                 document.getElementById('mainApp').classList.remove('hidden');
+                
+                // Initialize data first
+                if (!isDataLoaded) {
+                    await initializeStorage();
+                }
+                
                 setupUserInterface();
                 loadCoaches();
             } else {
@@ -1864,11 +2044,8 @@
             return historyHtml;
         }
 
-        // Initialize storage and load data
-        initializeStorage();
-
-        // Initialize dashboard on load
-        loadDashboard();
+        // Data will be initialized after login
+        // Dashboard will be loaded after successful login
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97276e6e25859d12',t:'MTc1NTc1MTAwNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9727ab15d5f6dfe3',t:'MTc1NTc1MzQ5MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
