@@ -704,8 +704,16 @@
             </div>
             <div class="space-y-4">
                 <div class="bg-blue-50 p-4 rounded-lg">
-                    <h4 class="font-semibold text-blue-800 mb-2">📋 Langkah Setup:</h4>
-                    <ol class="text-sm text-blue-700 space-y-2 list-decimal list-inside">
+                    <h4 class="font-semibold text-blue-800 mb-2">📁 Folder Google Drive:</h4>
+                    <div class="text-sm text-blue-700 space-y-2">
+                        <p><strong>Target Folder:</strong> <a href="https://drive.google.com/drive/folders/167Z7UsWjeMOxHgNcyuOqyGx1US7ORHrg" target="_blank" class="underline">Folder Google Drive Anda</a></p>
+                        <p><strong>Akun:</strong> rap210394@gmail.com</p>
+                        <p><strong>File Data:</strong> andesit_data.json</p>
+                    </div>
+                </div>
+                <div class="bg-green-50 p-4 rounded-lg">
+                    <h4 class="font-semibold text-green-800 mb-2">📋 Langkah Setup:</h4>
+                    <ol class="text-sm text-green-700 space-y-2 list-decimal list-inside">
                         <li>Buka <a href="https://console.cloud.google.com" target="_blank" class="underline">Google Cloud Console</a></li>
                         <li>Buat project baru atau pilih project existing</li>
                         <li>Enable Google Drive API</li>
@@ -743,8 +751,10 @@
             API_KEY: 'AIzaSyABCDEFGHIJKLMNOPQRSTUVWXYZ1234567',
             DISCOVERY_DOC: 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest',
             SCOPES: 'https://www.googleapis.com/auth/drive.file',
+            FOLDER_ID: '167Z7UsWjeMOxHgNcyuOqyGx1US7ORHrg', // Your specific Google Drive folder
             FOLDER_NAME: 'ANDESIT Swimming Club Data',
-            FILE_NAME: 'andesit_data.json'
+            FILE_NAME: 'andesit_data.json',
+            USER_EMAIL: 'rap210394@gmail.com'
         };
 
         // Google Drive API variables
@@ -808,37 +818,51 @@
 
             if (!googleAuth.isSignedIn.get()) {
                 await googleAuth.signIn();
-                showNotification('✅ Berhasil login ke Google Drive', 'success');
+                
+                // Verify the signed-in user
+                const user = googleAuth.currentUser.get();
+                const profile = user.getBasicProfile();
+                const userEmail = profile.getEmail();
+                
+                if (userEmail === GOOGLE_DRIVE_CONFIG.USER_EMAIL) {
+                    showNotification(`✅ Login berhasil sebagai ${userEmail}`, 'success');
+                } else {
+                    showNotification(`⚠️ Login sebagai ${userEmail} (bukan ${GOOGLE_DRIVE_CONFIG.USER_EMAIL})`, 'warning');
+                }
             }
         }
 
         async function findOrCreateFolder() {
             try {
-                // Search for existing folder
-                const response = await gapi.client.drive.files.list({
-                    q: `name='${GOOGLE_DRIVE_CONFIG.FOLDER_NAME}' and mimeType='application/vnd.google-apps.folder' and trashed=false`,
-                    spaces: 'drive'
-                });
+                // Use the specific folder ID provided by user
+                driveFolderId = GOOGLE_DRIVE_CONFIG.FOLDER_ID;
+                localStorage.setItem('andesit_drive_folder_id', driveFolderId);
+                
+                // Verify folder exists and is accessible
+                try {
+                    await gapi.client.drive.files.get({
+                        fileId: driveFolderId
+                    });
+                    console.log(`Using existing Google Drive folder: ${driveFolderId}`);
+                    return driveFolderId;
+                } catch (error) {
+                    console.error('Cannot access specified folder, creating new one:', error);
+                    
+                    // Fallback: Create new folder if specified folder is not accessible
+                    const folderResponse = await gapi.client.drive.files.create({
+                        resource: {
+                            name: GOOGLE_DRIVE_CONFIG.FOLDER_NAME,
+                            mimeType: 'application/vnd.google-apps.folder'
+                        }
+                    });
 
-                if (response.result.files.length > 0) {
-                    driveFolderId = response.result.files[0].id;
+                    driveFolderId = folderResponse.result.id;
                     localStorage.setItem('andesit_drive_folder_id', driveFolderId);
+                    console.log(`Created new folder: ${driveFolderId}`);
                     return driveFolderId;
                 }
-
-                // Create new folder
-                const folderResponse = await gapi.client.drive.files.create({
-                    resource: {
-                        name: GOOGLE_DRIVE_CONFIG.FOLDER_NAME,
-                        mimeType: 'application/vnd.google-apps.folder'
-                    }
-                });
-
-                driveFolderId = folderResponse.result.id;
-                localStorage.setItem('andesit_drive_folder_id', driveFolderId);
-                return driveFolderId;
             } catch (error) {
-                console.error('Error creating folder:', error);
+                console.error('Error with folder operations:', error);
                 throw error;
             }
         }
@@ -2373,5 +2397,5 @@
         // Data will be initialized after login
         // Dashboard will be loaded after successful login
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9727c307e060dfb7',t:'MTc1NTc1NDQ3Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9727c982d267dfb7',t:'MTc1NTc1NDczNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
