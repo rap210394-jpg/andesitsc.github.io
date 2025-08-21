@@ -591,6 +591,11 @@
                         <option value="Finalis">Finalis</option>
                     </select>
                 </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Catatan Waktu (mm:ss.ms)</label>
+                    <input type="text" id="achievementTime" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" placeholder="Contoh: 01:25.50 (opsional)" pattern="[0-9]{2}:[0-9]{2}\.[0-9]{2}">
+                    <p class="text-xs text-gray-500 mt-1">Format: menit:detik.milidetik (opsional)</p>
+                </div>
                 <div class="mb-6">
                     <label class="block text-gray-700 text-sm font-bold mb-2">Tanggal</label>
                     <input type="date" id="achievementDate" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" required>
@@ -998,6 +1003,7 @@
                     <div class="flex-1">
                         <p class="font-medium text-gray-800 text-sm">${achievement.athlete}</p>
                         <p class="text-xs text-gray-600">${achievement.competition}</p>
+                        ${achievement.time ? `<p class="text-xs text-blue-600 font-medium">${achievement.time}</p>` : ''}
                     </div>
                     <div class="text-right">
                         <span class="px-2 py-1 rounded-full text-xs font-medium ${
@@ -1503,14 +1509,15 @@
                         <div>
                             <h4 class="text-lg font-semibold text-gray-800">${achievement.athlete}</h4>
                             <p class="text-gray-600">${achievement.competition}</p>
-                            <div class="flex items-center mt-2">
+                            <div class="flex items-center mt-2 space-x-3">
                                 <span class="px-3 py-1 rounded-full text-sm font-medium ${
                                     achievement.rank === 'Juara 1' ? 'bg-yellow-100 text-yellow-800' :
                                     achievement.rank === 'Juara 2' ? 'bg-gray-100 text-gray-800' :
                                     achievement.rank === 'Juara 3' ? 'bg-orange-100 text-orange-800' :
                                     'bg-blue-100 text-blue-800'
                                 }">${achievement.rank}</span>
-                                <span class="ml-3 text-sm text-gray-500">${formatDate(achievement.date)}</span>
+                                ${achievement.time ? `<span class="text-sm font-bold text-blue-600">${achievement.time}</span>` : ''}
+                                <span class="text-sm text-gray-500">${formatDate(achievement.date)}</span>
                             </div>
                         </div>
                         ${editDeleteButtons}
@@ -1535,6 +1542,7 @@
                 document.getElementById('achievementAthlete').value = achievement.athlete;
                 document.getElementById('achievementCompetition').value = achievement.competition;
                 document.getElementById('achievementRank').value = achievement.rank;
+                document.getElementById('achievementTime').value = achievement.time || '';
                 document.getElementById('achievementDate').value = achievement.date;
                 document.getElementById('achievementModal').classList.remove('hidden');
             }
@@ -1562,6 +1570,7 @@
                 athlete: document.getElementById('achievementAthlete').value,
                 competition: document.getElementById('achievementCompetition').value,
                 rank: document.getElementById('achievementRank').value,
+                time: document.getElementById('achievementTime').value,
                 date: document.getElementById('achievementDate').value
             };
             
@@ -1861,5 +1870,5 @@
         // Initialize dashboard on load
         loadDashboard();
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9722efbe517cce45',t:'MTc1NTcwMzg3NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97276e6e25859d12',t:'MTc1NTc1MTAwNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
