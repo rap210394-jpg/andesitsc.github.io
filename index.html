@@ -1,0 +1,1865 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ANDESIT SWIMMING CLUB</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .sidebar-transition { transition: transform 0.3s ease-in-out; }
+        .fade-in { animation: fadeIn 0.3s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .card-hover { transition: transform 0.2s, box-shadow 0.2s; }
+        .card-hover:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.15); }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <!-- Login Modal -->
+    <div id="loginModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-8 w-96 max-w-md mx-4">
+            <div class="text-center mb-6">
+                <img src="https://i.imghippo.com/files/vls5156FUg.png" alt="ANDESIT Logo" class="w-16 h-16 mx-auto mb-4" onerror="this.src=''; this.alt='Logo gagal dimuat'; this.style.display='none';">
+                <h2 class="text-2xl font-bold text-blue-800">ANDESIT SWIMMING CLUB</h2>
+                <p class="text-gray-600 mb-4">Masuk ke Sistem</p>
+            </div>
+            <form id="loginForm">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Username</label>
+                    <input type="text" id="username" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" required>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Password</label>
+                    <input type="password" id="password" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" required>
+                </div>
+                <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-200">
+                    Masuk
+                </button>
+            </form>
+            <div id="loginError" class="mt-4 text-red-600 text-sm text-center hidden">
+                Username atau password salah!
+            </div>
+            <div class="mt-6 pt-4 border-t border-gray-200">
+                <p class="text-xs text-gray-500 text-center">
+                    © 2025 Andesit Swimming Club. Rizki Aditya Pratama. All Rights Reserved.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="mainApp" class="hidden">
+        <!-- Mobile Menu Button -->
+        <button id="mobileMenuBtn" class="lg:hidden fixed top-4 left-4 z-40 bg-blue-600 text-white p-2 rounded-lg">
+            <i class="fas fa-bars"></i>
+        </button>
+
+        <!-- Sidebar -->
+        <div id="sidebar" class="fixed left-0 top-0 h-full w-64 bg-blue-800 text-white transform -translate-x-full lg:translate-x-0 sidebar-transition z-30">
+            <div class="p-6 border-b border-blue-700">
+                <div class="flex items-center space-x-3">
+                    <img src="https://i.imghippo.com/files/vls5156FUg.png" alt="Logo" class="w-12 h-12" onerror="this.src=''; this.alt='Logo gagal dimuat'; this.style.display='none';">
+                    <div>
+                        <h1 class="text-lg font-bold">ANDESIT</h1>
+                        <p class="text-sm text-blue-200">Swimming Club</p>
+                    </div>
+                </div>
+            </div>
+            
+            <nav class="mt-6">
+                <a href="#" onclick="showSection('dashboard')" class="nav-item flex items-center px-6 py-3 text-blue-100 hover:bg-blue-700 transition duration-200 bg-blue-700">
+                    <i class="fas fa-tachometer-alt mr-3"></i>
+                    Dashboard
+                </a>
+                <a href="#" onclick="showSection('coaches')" class="nav-item flex items-center px-6 py-3 text-blue-100 hover:bg-blue-700 transition duration-200">
+                    <i class="fas fa-user-tie mr-3"></i>
+                    Profil Pelatih
+                </a>
+                <a href="#" onclick="showSection('athletes')" class="nav-item flex items-center px-6 py-3 text-blue-100 hover:bg-blue-700 transition duration-200">
+                    <i class="fas fa-swimmer mr-3"></i>
+                    Atlet
+                </a>
+                <a href="#" onclick="showSection('schedule')" class="nav-item flex items-center px-6 py-3 text-blue-100 hover:bg-blue-700 transition duration-200">
+                    <i class="fas fa-calendar-alt mr-3"></i>
+                    Jadwal Latihan
+                </a>
+                <a href="#" onclick="showSection('achievements')" class="nav-item flex items-center px-6 py-3 text-blue-100 hover:bg-blue-700 transition duration-200">
+                    <i class="fas fa-trophy mr-3"></i>
+                    Prestasi Terbaru
+                </a>
+                <a href="#" onclick="showSection('eventHistory')" class="nav-item flex items-center px-6 py-3 text-blue-100 hover:bg-blue-700 transition duration-200">
+                    <i class="fas fa-stopwatch mr-3"></i>
+                    Event History
+                </a>
+            </nav>
+
+            <div class="absolute bottom-6 left-6 right-6">
+                <button onclick="logout()" class="w-full bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition duration-200">
+                    <i class="fas fa-sign-out-alt mr-2"></i>
+                    Logout
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="lg:ml-64 min-h-screen">
+            <!-- Header -->
+            <header class="bg-white shadow-sm border-b border-gray-200 p-4 lg:p-6">
+                <div class="flex justify-between items-center">
+                    <h2 id="pageTitle" class="text-2xl font-bold text-gray-800">Dashboard</h2>
+                    <div class="text-sm text-gray-600">
+                        <i class="fas fa-user mr-2"></i>
+                        Admin
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content Sections -->
+            <main class="p-4 lg:p-6">
+                <!-- Dashboard Section -->
+                <div id="dashboardSection" class="section fade-in">
+                    <!-- Statistics Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <div class="bg-white rounded-lg shadow-md p-6">
+                            <div class="flex items-center">
+                                <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+                                    <i class="fas fa-user-tie text-2xl"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm font-medium text-gray-600">Total Pelatih</p>
+                                    <p id="totalCoaches" class="text-2xl font-bold text-gray-900">0</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-lg shadow-md p-6">
+                            <div class="flex items-center">
+                                <div class="p-3 rounded-full bg-green-100 text-green-600">
+                                    <i class="fas fa-swimmer text-2xl"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm font-medium text-gray-600">Total Atlet</p>
+                                    <p id="totalAthletes" class="text-2xl font-bold text-gray-900">0</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-lg shadow-md p-6">
+                            <div class="flex items-center">
+                                <div class="p-3 rounded-full bg-purple-100 text-purple-600">
+                                    <i class="fas fa-calendar-alt text-2xl"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm font-medium text-gray-600">Jadwal Latihan</p>
+                                    <p id="totalSchedules" class="text-2xl font-bold text-gray-900">0</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-lg shadow-md p-6">
+                            <div class="flex items-center">
+                                <div class="p-3 rounded-full bg-yellow-100 text-yellow-600">
+                                    <i class="fas fa-trophy text-2xl"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm font-medium text-gray-600">Total Prestasi</p>
+                                    <p id="totalAchievements" class="text-2xl font-bold text-gray-900">0</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts and Recent Activity -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                        <!-- Age Group Distribution -->
+                        <div class="bg-white rounded-lg shadow-md p-6">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Distribusi Kelompok Umur</h3>
+                            <div id="ageGroupChart" class="space-y-3">
+                                <!-- Age group bars will be populated here -->
+                            </div>
+                        </div>
+                        
+                        <!-- Recent Achievements -->
+                        <div class="bg-white rounded-lg shadow-md p-6">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Prestasi Terbaru</h3>
+                            <div id="recentAchievements" class="space-y-3">
+                                <!-- Recent achievements will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Aksi Cepat</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <button onclick="showAddCoachModal()" class="flex items-center justify-center p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition duration-200">
+                                <div class="text-center">
+                                    <i class="fas fa-user-plus text-2xl text-gray-400 mb-2"></i>
+                                    <p class="text-sm font-medium text-gray-600">Tambah Pelatih</p>
+                                </div>
+                            </button>
+                            
+                            <button onclick="showAddAthleteModal()" class="flex items-center justify-center p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-green-500 hover:bg-green-50 transition duration-200">
+                                <div class="text-center">
+                                    <i class="fas fa-swimmer text-2xl text-gray-400 mb-2"></i>
+                                    <p class="text-sm font-medium text-gray-600">Tambah Atlet</p>
+                                </div>
+                            </button>
+                            
+                            <button onclick="showAddScheduleModal()" class="flex items-center justify-center p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-purple-500 hover:bg-purple-50 transition duration-200">
+                                <div class="text-center">
+                                    <i class="fas fa-calendar-plus text-2xl text-gray-400 mb-2"></i>
+                                    <p class="text-sm font-medium text-gray-600">Tambah Jadwal</p>
+                                </div>
+                            </button>
+                            
+                            <button onclick="showAddAchievementModal()" class="flex items-center justify-center p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-yellow-500 hover:bg-yellow-50 transition duration-200">
+                                <div class="text-center">
+                                    <i class="fas fa-trophy text-2xl text-gray-400 mb-2"></i>
+                                    <p class="text-sm font-medium text-gray-600">Tambah Prestasi</p>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Coaches Section -->
+                <div id="coachesSection" class="section hidden fade-in">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-semibold text-gray-800">Daftar Pelatih</h3>
+                        <button id="addCoachBtn" onclick="showAddCoachModal()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200">
+                            <i class="fas fa-plus mr-2"></i>
+                            Tambah Pelatih
+                        </button>
+                    </div>
+                    <div id="coachesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        <!-- Coaches will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Athletes Section -->
+                <div id="athletesSection" class="section hidden fade-in">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-semibold text-gray-800">Daftar Atlet</h3>
+                        <button id="addAthleteBtn" onclick="showAddAthleteModal()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200">
+                            <i class="fas fa-plus mr-2"></i>
+                            Tambah Atlet
+                        </button>
+                    </div>
+                    
+                    <!-- Age Group Filter -->
+                    <div class="mb-6">
+                        <div class="flex items-center space-x-3">
+                            <label class="text-sm font-medium text-gray-700">Filter Kelompok Umur:</label>
+                            <select id="ageGroupFilter" onchange="filterAthletes(this.value)" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 bg-white">
+                                <option value="all">Semua Atlet</option>
+                                <option value="KU I">KU I (Lahir 31-12-2009 dan Sebelumnya)</option>
+                                <option value="KU II">KU II (Lahir 01-01-2010 s/d 31-12-2011)</option>
+                                <option value="KU III">KU III (Lahir 01-01-2012 s/d 31-12-2013)</option>
+                                <option value="KU IV">KU IV (Lahir 01-01-2014 s/d 31-12-2015)</option>
+                                <option value="KU VA">KU VA (Lahir 01-01-2016 s/d 31-12-2017)</option>
+                                <option value="KU VB">KU VB (Lahir 01-01-2018 dan Sesudahnya)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div id="athletesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        <!-- Athletes will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Schedule Section -->
+                <div id="scheduleSection" class="section hidden fade-in">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-semibold text-gray-800">Jadwal Latihan</h3>
+                        <button id="addScheduleBtn" onclick="showAddScheduleModal()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200">
+                            <i class="fas fa-plus mr-2"></i>
+                            Tambah Jadwal
+                        </button>
+                    </div>
+                    <div id="scheduleList" class="space-y-4">
+                        <!-- Schedule will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Achievements Section -->
+                <div id="achievementsSection" class="section hidden fade-in">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-semibold text-gray-800">Prestasi Terbaru</h3>
+                        <button id="addAchievementBtn" onclick="showAddAchievementModal()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200">
+                            <i class="fas fa-plus mr-2"></i>
+                            Tambah Prestasi
+                        </button>
+                    </div>
+                    <div id="achievementsList" class="space-y-4">
+                        <!-- Achievements will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Event History Section -->
+                <div id="eventHistorySection" class="section hidden fade-in">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-semibold text-gray-800">Event History</h3>
+                        <button id="addEventBtn" onclick="showAddEventModal()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200">
+                            <i class="fas fa-plus mr-2"></i>
+                            Tambah Event
+                        </button>
+                    </div>
+                    
+                    <!-- Filters -->
+                    <div class="mb-6 space-y-4">
+                        <!-- Athlete Filter -->
+                        <div class="flex items-center space-x-3">
+                            <label class="text-sm font-medium text-gray-700">Filter Atlet:</label>
+                            <select id="eventAthleteFilter" onchange="applyEventFilters()" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 bg-white">
+                                <option value="all">Semua Atlet</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Date Filters -->
+                        <div class="flex items-center space-x-6">
+                            <div class="flex items-center space-x-3">
+                                <label class="text-sm font-medium text-gray-700">Bulan:</label>
+                                <select id="eventMonthFilter" onchange="applyEventFilters()" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 bg-white">
+                                    <option value="all">Semua Bulan</option>
+                                    <option value="01">Januari</option>
+                                    <option value="02">Februari</option>
+                                    <option value="03">Maret</option>
+                                    <option value="04">April</option>
+                                    <option value="05">Mei</option>
+                                    <option value="06">Juni</option>
+                                    <option value="07">Juli</option>
+                                    <option value="08">Agustus</option>
+                                    <option value="09">September</option>
+                                    <option value="10">Oktober</option>
+                                    <option value="11">November</option>
+                                    <option value="12">Desember</option>
+                                </select>
+                            </div>
+                            
+                            <div class="flex items-center space-x-3">
+                                <label class="text-sm font-medium text-gray-700">Tahun:</label>
+                                <select id="eventYearFilter" onchange="applyEventFilters()" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 bg-white">
+                                    <option value="all">Semua Tahun</option>
+                                </select>
+                            </div>
+                            
+                            <button onclick="resetEventFilters()" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition duration-200 text-sm">
+                                <i class="fas fa-undo mr-1"></i>
+                                Reset Filter
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="eventHistoryList" class="space-y-4">
+                        <!-- Event history will be populated here -->
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- Profile Detail Modal -->
+    <div id="profileModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg p-6 w-96 max-w-md mx-4 max-h-96 overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-gray-800">Detail Profil</h3>
+                <button onclick="closeProfileModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="profileContent">
+                <!-- Profile content will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Coach Modal -->
+    <div id="coachModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg p-6 w-96 max-w-md mx-4 max-h-96 overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="coachModalTitle" class="text-xl font-bold text-gray-800">Tambah Pelatih</h3>
+                <button onclick="closeCoachModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="coachForm">
+                <input type="hidden" id="coachId">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Nama</label>
+                    <input type="text" id="coachName" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Foto</label>
+                    <input type="file" id="coachPhoto" accept="image/*" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
+                    <div id="coachPhotoPreview" class="mt-2 hidden">
+                        <img id="coachPreviewImg" class="w-20 h-20 rounded-full object-cover mx-auto" alt="Preview">
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Tanggal Lahir</label>
+                    <input type="date" id="coachBirthDate" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Jenis Kelamin</label>
+                    <select id="coachGender" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" required>
+                        <option value="">Pilih Jenis Kelamin</option>
+                        <option value="Laki-laki">Laki-laki</option>
+                        <option value="Perempuan">Perempuan</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Level</label>
+                    <select id="coachLevel" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" required>
+                        <option value="">Pilih Level</option>
+                        <option value="Pelatih Utama">Pelatih Utama</option>
+                        <option value="Pelatih Asisten">Pelatih Asisten</option>
+                        <option value="Pelatih Junior">Pelatih Junior</option>
+                    </select>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Status</label>
+                    <select id="coachStatus" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" required>
+                        <option value="">Pilih Status</option>
+                        <option value="Aktif">Aktif</option>
+                        <option value="Tidak Aktif">Tidak Aktif</option>
+                    </select>
+                </div>
+                <div class="flex space-x-3">
+                    <button type="submit" class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-200">
+                        Simpan
+                    </button>
+                    <button type="button" onclick="closeCoachModal()" class="flex-1 bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600 transition duration-200">
+                        Batal
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add/Edit Athlete Modal -->
+    <div id="athleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg p-6 w-96 max-w-md mx-4 max-h-96 overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="athleteModalTitle" class="text-xl font-bold text-gray-800">Tambah Atlet</h3>
+                <button onclick="closeAthleteModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="athleteForm">
+                <input type="hidden" id="athleteId">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Nama</label>
+                    <input type="text" id="athleteName" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Foto</label>
+                    <input type="file" id="athletePhoto" accept="image/*" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
+                    <div id="athletePhotoPreview" class="mt-2 hidden">
+                        <img id="athletePreviewImg" class="w-20 h-20 rounded-full object-cover mx-auto" alt="Preview">
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Tanggal Lahir</label>
+                    <input type="date" id="athleteBirthDate" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Jenis Kelamin</label>
+                    <select id="athleteGender" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" required>
+                        <option value="">Pilih Jenis Kelamin</option>
+                        <option value="Laki-laki">Laki-laki</option>
+                        <option value="Perempuan">Perempuan</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Kelompok Umur (KU)</label>
+                    <select id="athleteAgeGroup" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" required>
+                        <option value="">Pilih Kelompok Umur</option>
+                        <option value="KU I">KU I (Tahun Lahir 31-12-2009 dan Sebelumnya)</option>
+                        <option value="KU II">KU II (Tahun Lahir 01-01-2010 s/d 31-12-2011)</option>
+                        <option value="KU III">KU III (Tahun Lahir 01-01-2012 s/d 31-12-2013)</option>
+                        <option value="KU IV">KU IV (Tahun Lahir 01-01-2014 s/d 31-12-2015)</option>
+                        <option value="KU VA">KU VA (Tahun Lahir 01-01-2016 s/d 31-12-2017)</option>
+                        <option value="KU VB">KU VB (Tahun Lahir 01-01-2018 dan Sesudahnya)</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Level</label>
+                    <select id="athleteLevel" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" required>
+                        <option value="">Pilih Level</option>
+                        <option value="Pemula">Pemula</option>
+                        <option value="Menengah">Menengah</option>
+                        <option value="Lanjutan">Lanjutan</option>
+                        <option value="Kompetitif">Kompetitif</option>
+                    </select>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Status</label>
+                    <select id="athleteStatus" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" required>
+                        <option value="">Pilih Status</option>
+                        <option value="Aktif">Aktif</option>
+                        <option value="Tidak Aktif">Tidak Aktif</option>
+                    </select>
+                </div>
+                <div class="flex space-x-3">
+                    <button type="submit" class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-200">
+                        Simpan
+                    </button>
+                    <button type="button" onclick="closeAthleteModal()" class="flex-1 bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600 transition duration-200">
+                        Batal
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add/Edit Schedule Modal -->
+    <div id="scheduleModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg p-6 w-96 max-w-md mx-4 max-h-96 overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="scheduleModalTitle" class="text-xl font-bold text-gray-800">Tambah Jadwal</h3>
+                <button onclick="closeScheduleModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="scheduleForm">
+                <input type="hidden" id="scheduleId">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Hari</label>
+                    <select id="scheduleDay" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" required>
+                        <option value="">Pilih Hari</option>
+                        <option value="Senin">Senin</option>
+                        <option value="Selasa">Selasa</option>
+                        <option value="Rabu">Rabu</option>
+                        <option value="Kamis">Kamis</option>
+                        <option value="Jumat">Jumat</option>
+                        <option value="Sabtu">Sabtu</option>
+                        <option value="Minggu">Minggu</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Waktu</label>
+                    <input type="time" id="scheduleTime" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Kelompok</label>
+                    <input type="text" id="scheduleGroup" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" placeholder="Contoh: Pemula, Menengah, Kompetitif" required>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Pelatih</label>
+                    <input type="text" id="scheduleCoach" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" required>
+                </div>
+                <div class="flex space-x-3">
+                    <button type="submit" class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-200">
+                        Simpan
+                    </button>
+                    <button type="button" onclick="closeScheduleModal()" class="flex-1 bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600 transition duration-200">
+                        Batal
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add/Edit Achievement Modal -->
+    <div id="achievementModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg p-6 w-96 max-w-md mx-4 max-h-96 overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="achievementModalTitle" class="text-xl font-bold text-gray-800">Tambah Prestasi</h3>
+                <button onclick="closeAchievementModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="achievementForm">
+                <input type="hidden" id="achievementId">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Nama Atlet</label>
+                    <input type="text" id="achievementAthlete" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Kompetisi</label>
+                    <input type="text" id="achievementCompetition" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Prestasi</label>
+                    <select id="achievementRank" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" required>
+                        <option value="">Pilih Prestasi</option>
+                        <option value="Juara 1">Juara 1</option>
+                        <option value="Juara 2">Juara 2</option>
+                        <option value="Juara 3">Juara 3</option>
+                        <option value="Finalis">Finalis</option>
+                    </select>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Tanggal</label>
+                    <input type="date" id="achievementDate" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" required>
+                </div>
+                <div class="flex space-x-3">
+                    <button type="submit" class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-200">
+                        Simpan
+                    </button>
+                    <button type="button" onclick="closeAchievementModal()" class="flex-1 bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600 transition duration-200">
+                        Batal
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add/Edit Event History Modal -->
+    <div id="eventModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg p-6 w-96 max-w-md mx-4 max-h-96 overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="eventModalTitle" class="text-xl font-bold text-gray-800">Tambah Event</h3>
+                <button onclick="closeEventModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="eventForm">
+                <input type="hidden" id="eventId">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Nama Atlet</label>
+                    <select id="eventAthlete" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" required>
+                        <option value="">Pilih Atlet</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Nama Event</label>
+                    <input type="text" id="eventName" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" placeholder="Contoh: Freestyle 50m" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Gaya Renang</label>
+                    <select id="eventStroke" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" required>
+                        <option value="">Pilih Gaya</option>
+                        <option value="Freestyle">Freestyle</option>
+                        <option value="Backstroke">Backstroke</option>
+                        <option value="Breaststroke">Breaststroke</option>
+                        <option value="Butterfly">Butterfly</option>
+                        <option value="Individual Medley">Individual Medley</option>
+                        <option value="Freestyle Kickboard">Freestyle Kickboard</option>
+                        <option value="Breaststroke Kickboard">Breaststroke Kickboard</option>
+                        <option value="Backstroke Kickboard">Backstroke Kickboard</option>
+                        <option value="Butterfly Kickboard">Butterfly Kickboard</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Jarak (meter)</label>
+                    <select id="eventDistance" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" required>
+                        <option value="">Pilih Jarak</option>
+                        <option value="25">25m</option>
+                        <option value="50">50m</option>
+                        <option value="100">100m</option>
+                        <option value="200">200m</option>
+                        <option value="400">400m</option>
+                        <option value="800">800m</option>
+                        <option value="1500">1500m</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Waktu (mm:ss.ms)</label>
+                    <input type="text" id="eventTime" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" placeholder="Contoh: 01:25.50" pattern="[0-9]{2}:[0-9]{2}\.[0-9]{2}" required>
+                    <p class="text-xs text-gray-500 mt-1">Format: menit:detik.milidetik (contoh: 01:25.50)</p>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Tanggal</label>
+                    <input type="date" id="eventDate" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" required>
+                </div>
+                <div class="flex space-x-3">
+                    <button type="submit" class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-200">
+                        Simpan
+                    </button>
+                    <button type="button" onclick="closeEventModal()" class="flex-1 bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600 transition duration-200">
+                        Batal
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Data Storage with Local Storage
+        const defaultCoaches = [];
+        const defaultAthletes = [];
+        const defaultSchedules = [];
+        const defaultAchievements = [];
+        const defaultEventHistory = [];
+
+        // Load data from localStorage or use defaults
+        let coaches = JSON.parse(localStorage.getItem('andesit_coaches')) || defaultCoaches;
+        let athletes = JSON.parse(localStorage.getItem('andesit_athletes')) || defaultAthletes;
+        let schedules = JSON.parse(localStorage.getItem('andesit_schedules')) || defaultSchedules;
+        let achievements = JSON.parse(localStorage.getItem('andesit_achievements')) || defaultAchievements;
+        let eventHistory = JSON.parse(localStorage.getItem('andesit_eventHistory')) || defaultEventHistory;
+
+        // Save data to localStorage
+        function saveToStorage() {
+            localStorage.setItem('andesit_coaches', JSON.stringify(coaches));
+            localStorage.setItem('andesit_athletes', JSON.stringify(athletes));
+            localStorage.setItem('andesit_schedules', JSON.stringify(schedules));
+            localStorage.setItem('andesit_achievements', JSON.stringify(achievements));
+            localStorage.setItem('andesit_eventHistory', JSON.stringify(eventHistory));
+        }
+
+        // Initialize storage with default data if first time
+        function initializeStorage() {
+            if (!localStorage.getItem('andesit_coaches')) {
+                localStorage.setItem('andesit_coaches', JSON.stringify(defaultCoaches));
+            }
+            if (!localStorage.getItem('andesit_athletes')) {
+                localStorage.setItem('andesit_athletes', JSON.stringify(defaultAthletes));
+            }
+            if (!localStorage.getItem('andesit_schedules')) {
+                localStorage.setItem('andesit_schedules', JSON.stringify(defaultSchedules));
+            }
+            if (!localStorage.getItem('andesit_achievements')) {
+                localStorage.setItem('andesit_achievements', JSON.stringify(defaultAchievements));
+            }
+            if (!localStorage.getItem('andesit_eventHistory')) {
+                localStorage.setItem('andesit_eventHistory', JSON.stringify(defaultEventHistory));
+            }
+        }
+
+        // Utility Functions
+        function calculateAge(birthDate) {
+            const today = new Date();
+            const birth = new Date(birthDate);
+            let age = today.getFullYear() - birth.getFullYear();
+            const monthDiff = today.getMonth() - birth.getMonth();
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+                age--;
+            }
+            return age;
+        }
+
+        function getAgeGroup(birthDate) {
+            const birth = new Date(birthDate);
+            const birthYear = birth.getFullYear();
+            
+            if (birthYear <= 2009) return 'KU I';
+            if (birthYear >= 2010 && birthYear <= 2011) return 'KU II';
+            if (birthYear >= 2012 && birthYear <= 2013) return 'KU III';
+            if (birthYear >= 2014 && birthYear <= 2015) return 'KU IV';
+            if (birthYear >= 2016 && birthYear <= 2017) return 'KU VA';
+            if (birthYear >= 2018) return 'KU VB';
+            return 'Tidak Diketahui';
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('id-ID', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+
+        function generateAvatar(name, photo = null) {
+            if (photo) {
+                return `<img src="${photo}" alt="${name}" class="w-16 h-16 rounded-full object-cover">`;
+            }
+            const colors = ['bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-pink-500', 'bg-indigo-500'];
+            const colorIndex = name.length % colors.length;
+            const initials = name.split(' ').map(n => n[0]).join('').toUpperCase();
+            return `<div class="w-16 h-16 ${colors[colorIndex]} rounded-full flex items-center justify-center text-white font-bold text-lg">${initials}</div>`;
+        }
+
+        // Login System
+        let userRole = 'admin'; // 'admin' or 'user'
+        
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            if (username === 'admin' && password === 'admin') {
+                userRole = 'admin';
+                document.getElementById('loginModal').classList.add('hidden');
+                document.getElementById('mainApp').classList.remove('hidden');
+                setupUserInterface();
+                loadCoaches();
+            } else if (username === 'user' && password === 'user') {
+                userRole = 'user';
+                document.getElementById('loginModal').classList.add('hidden');
+                document.getElementById('mainApp').classList.remove('hidden');
+                setupUserInterface();
+                loadCoaches();
+            } else {
+                document.getElementById('loginError').classList.remove('hidden');
+            }
+        });
+
+        function logout() {
+            document.getElementById('mainApp').classList.add('hidden');
+            document.getElementById('loginModal').classList.remove('hidden');
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('loginError').classList.add('hidden');
+            userRole = 'admin'; // Reset to default
+        }
+
+        function setupUserInterface() {
+            const isAdmin = userRole === 'admin';
+            
+            // Show/hide specific add buttons by ID
+            const addButtonIds = ['addCoachBtn', 'addAthleteBtn', 'addScheduleBtn', 'addAchievementBtn', 'addEventBtn'];
+            addButtonIds.forEach(buttonId => {
+                const button = document.getElementById(buttonId);
+                if (button) {
+                    button.style.display = isAdmin ? 'block' : 'none';
+                }
+            });
+            
+            // Hide quick actions section for users
+            setTimeout(() => {
+                const quickActionsCards = document.querySelectorAll('button[onclick*="showAdd"]');
+                quickActionsCards.forEach(button => {
+                    if (button.closest('.grid.grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-4')) {
+                        button.style.display = isAdmin ? 'flex' : 'none';
+                    }
+                });
+                
+                // Hide the entire quick actions section for users
+                const quickActionsSection = document.querySelector('h3:contains("Aksi Cepat")');
+                if (quickActionsSection) {
+                    const parentSection = quickActionsSection.closest('.bg-white.rounded-lg.shadow-md.p-6');
+                    if (parentSection) {
+                        parentSection.style.display = isAdmin ? 'block' : 'none';
+                    }
+                }
+            }, 100);
+            
+            // Update header to show user role
+            const headerUserInfo = document.querySelector('header .text-sm.text-gray-600');
+            if (headerUserInfo) {
+                headerUserInfo.innerHTML = `
+                    <i class="fas fa-user mr-2"></i>
+                    ${isAdmin ? 'Admin (Pelatih)' : 'User (Atlet)'}
+                `;
+            }
+            
+            // Update page title based on role
+            const pageTitle = document.getElementById('pageTitle');
+            if (pageTitle && pageTitle.textContent === 'Dashboard') {
+                pageTitle.textContent = isAdmin ? 'Dashboard Admin' : 'Dashboard Atlet';
+            }
+        }
+
+        // Navigation
+        function showSection(section) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
+            
+            // Remove active class from all nav items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('bg-blue-700');
+            });
+            
+            // Show selected section
+            document.getElementById(section + 'Section').classList.remove('hidden');
+            
+            // Add active class to clicked nav item
+            event.target.closest('.nav-item').classList.add('bg-blue-700');
+            
+            // Update page title
+            const titles = {
+                'dashboard': 'Dashboard',
+                'coaches': 'Profil Pelatih',
+                'athletes': 'Atlet',
+                'schedule': 'Jadwal Latihan',
+                'achievements': 'Prestasi Terbaru',
+                'eventHistory': 'Event History'
+            };
+            document.getElementById('pageTitle').textContent = titles[section];
+            
+            // Load data for the section
+            switch(section) {
+                case 'dashboard':
+                    loadDashboard();
+                    break;
+                case 'coaches':
+                    loadCoaches();
+                    break;
+                case 'athletes':
+                    // Reset filter when switching to athletes section
+                    currentFilter = 'all';
+                    // Reset dropdown to show all athletes
+                    setTimeout(() => {
+                        const dropdown = document.getElementById('ageGroupFilter');
+                        if (dropdown) {
+                            dropdown.value = 'all';
+                        }
+                    }, 100);
+                    loadAthletes();
+                    break;
+                case 'schedule':
+                    loadSchedules();
+                    break;
+                case 'achievements':
+                    loadAchievements();
+                    break;
+                case 'eventHistory':
+                    loadEventHistory();
+                    break;
+            }
+
+            // Close mobile menu
+            closeMobileMenu();
+        }
+
+        // Mobile Menu
+        document.getElementById('mobileMenuBtn').addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('-translate-x-full');
+        });
+
+        function closeMobileMenu() {
+            const sidebar = document.getElementById('sidebar');
+            if (window.innerWidth < 1024) {
+                sidebar.classList.add('-translate-x-full');
+            }
+        }
+
+        // Dashboard Management
+        function loadDashboard() {
+            updateStatistics();
+            loadAgeGroupChart();
+            loadRecentAchievements();
+        }
+
+        function updateStatistics() {
+            document.getElementById('totalCoaches').textContent = coaches.length;
+            document.getElementById('totalAthletes').textContent = athletes.length;
+            document.getElementById('totalSchedules').textContent = schedules.length;
+            document.getElementById('totalAchievements').textContent = achievements.length;
+        }
+
+        function loadAgeGroupChart() {
+            const ageGroups = {
+                'KU I': 0,
+                'KU II': 0,
+                'KU III': 0,
+                'KU IV': 0,
+                'KU VA': 0,
+                'KU VB': 0
+            };
+
+            athletes.forEach(athlete => {
+                const ageGroup = athlete.ageGroup || getAgeGroup(athlete.birthDate);
+                if (ageGroups.hasOwnProperty(ageGroup)) {
+                    ageGroups[ageGroup]++;
+                }
+            });
+
+            const maxCount = Math.max(...Object.values(ageGroups));
+            const chartContainer = document.getElementById('ageGroupChart');
+            chartContainer.innerHTML = '';
+
+            Object.entries(ageGroups).forEach(([group, count]) => {
+                const percentage = maxCount > 0 ? (count / maxCount) * 100 : 0;
+                const bar = document.createElement('div');
+                bar.className = 'flex items-center justify-between';
+                bar.innerHTML = `
+                    <div class="flex items-center flex-1">
+                        <span class="text-sm font-medium text-gray-700 w-12">${group}</span>
+                        <div class="flex-1 mx-3 bg-gray-200 rounded-full h-4">
+                            <div class="bg-blue-600 h-4 rounded-full transition-all duration-500" style="width: ${percentage}%"></div>
+                        </div>
+                        <span class="text-sm font-bold text-gray-900 w-8">${count}</span>
+                    </div>
+                `;
+                chartContainer.appendChild(bar);
+            });
+        }
+
+        function loadRecentAchievements() {
+            const recentContainer = document.getElementById('recentAchievements');
+            recentContainer.innerHTML = '';
+
+            // Sort achievements by date (newest first) and take top 5
+            const recentAchievements = [...achievements]
+                .sort((a, b) => new Date(b.date) - new Date(a.date))
+                .slice(0, 5);
+
+            if (recentAchievements.length === 0) {
+                recentContainer.innerHTML = `
+                    <div class="text-center py-4">
+                        <i class="fas fa-trophy text-3xl text-gray-300 mb-2"></i>
+                        <p class="text-gray-500 text-sm">Belum ada prestasi</p>
+                    </div>
+                `;
+                return;
+            }
+
+            recentAchievements.forEach(achievement => {
+                const item = document.createElement('div');
+                item.className = 'flex items-center justify-between p-3 bg-gray-50 rounded-lg';
+                item.innerHTML = `
+                    <div class="flex-1">
+                        <p class="font-medium text-gray-800 text-sm">${achievement.athlete}</p>
+                        <p class="text-xs text-gray-600">${achievement.competition}</p>
+                    </div>
+                    <div class="text-right">
+                        <span class="px-2 py-1 rounded-full text-xs font-medium ${
+                            achievement.rank === 'Juara 1' ? 'bg-yellow-100 text-yellow-800' :
+                            achievement.rank === 'Juara 2' ? 'bg-gray-100 text-gray-800' :
+                            achievement.rank === 'Juara 3' ? 'bg-orange-100 text-orange-800' :
+                            'bg-blue-100 text-blue-800'
+                        }">${achievement.rank}</span>
+                        <p class="text-xs text-gray-500 mt-1">${formatDate(achievement.date)}</p>
+                    </div>
+                `;
+                recentContainer.appendChild(item);
+            });
+        }
+
+        // Coaches Management
+        function loadCoaches() {
+            const grid = document.getElementById('coachesGrid');
+            grid.innerHTML = '';
+            
+            coaches.forEach(coach => {
+                const card = document.createElement('div');
+                card.className = 'bg-white rounded-lg shadow-md p-6 card-hover';
+                
+                const isAdmin = userRole === 'admin';
+                const editDeleteButtons = isAdmin ? `
+                    <div class="flex space-x-2">
+                        <button onclick="editCoach(${coach.id})" class="flex-1 bg-yellow-500 text-white py-1 px-2 rounded text-xs hover:bg-yellow-600 transition duration-200">
+                            Edit
+                        </button>
+                        <button onclick="deleteCoach(${coach.id})" class="flex-1 bg-red-500 text-white py-1 px-2 rounded text-xs hover:bg-red-600 transition duration-200">
+                            Hapus
+                        </button>
+                    </div>
+                ` : '';
+                
+                card.innerHTML = `
+                    <div class="text-center">
+                        ${generateAvatar(coach.name, coach.photo)}
+                        <h4 class="mt-4 font-semibold text-gray-800">${coach.name}</h4>
+                        <p class="text-sm text-gray-600 mb-4">${coach.level}</p>
+                        <div class="space-y-2">
+                            <button onclick="viewProfile('coach', ${coach.id})" class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-200 text-sm">
+                                Lihat Profil
+                            </button>
+                            ${editDeleteButtons}
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function showAddCoachModal() {
+            document.getElementById('coachModalTitle').textContent = 'Tambah Pelatih';
+            document.getElementById('coachForm').reset();
+            document.getElementById('coachId').value = '';
+            document.getElementById('coachModal').classList.remove('hidden');
+        }
+
+        function editCoach(id) {
+            const coach = coaches.find(c => c.id === id);
+            if (coach) {
+                document.getElementById('coachModalTitle').textContent = 'Edit Pelatih';
+                document.getElementById('coachId').value = coach.id;
+                document.getElementById('coachName').value = coach.name;
+                document.getElementById('coachBirthDate').value = coach.birthDate;
+                document.getElementById('coachGender').value = coach.gender || '';
+                document.getElementById('coachLevel').value = coach.level;
+                document.getElementById('coachStatus').value = coach.status;
+                
+                // Show existing photo if available
+                if (coach.photo) {
+                    document.getElementById('coachPreviewImg').src = coach.photo;
+                    document.getElementById('coachPhotoPreview').classList.remove('hidden');
+                } else {
+                    document.getElementById('coachPhotoPreview').classList.add('hidden');
+                }
+                
+                document.getElementById('coachModal').classList.remove('hidden');
+            }
+        }
+
+        function deleteCoach(id) {
+            if (confirm('Apakah Anda yakin ingin menghapus pelatih ini?')) {
+                coaches = coaches.filter(c => c.id !== id);
+                saveToStorage();
+                loadCoaches();
+                updateStatistics();
+            }
+        }
+
+        function closeCoachModal() {
+            document.getElementById('coachModal').classList.add('hidden');
+            document.getElementById('coachPhotoPreview').classList.add('hidden');
+            document.getElementById('coachPhoto').value = '';
+        }
+
+        document.getElementById('coachForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const id = document.getElementById('coachId').value;
+            const photoFile = document.getElementById('coachPhoto').files[0];
+            
+            const coachData = {
+                name: document.getElementById('coachName').value,
+                birthDate: document.getElementById('coachBirthDate').value,
+                gender: document.getElementById('coachGender').value,
+                level: document.getElementById('coachLevel').value,
+                status: document.getElementById('coachStatus').value
+            };
+
+            // Handle photo upload
+            if (photoFile) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    coachData.photo = e.target.result;
+                    saveCoachData();
+                };
+                reader.readAsDataURL(photoFile);
+            } else {
+                // Keep existing photo if editing and no new photo selected
+                if (id) {
+                    const existingCoach = coaches.find(c => c.id === parseInt(id));
+                    if (existingCoach && existingCoach.photo) {
+                        coachData.photo = existingCoach.photo;
+                    }
+                }
+                saveCoachData();
+            }
+
+            function saveCoachData() {
+                if (id) {
+                    // Edit existing coach
+                    const index = coaches.findIndex(c => c.id === parseInt(id));
+                    if (index !== -1) {
+                        coaches[index] = { ...coaches[index], ...coachData };
+                    }
+                } else {
+                    // Add new coach
+                    const newId = Math.max(...coaches.map(c => c.id), 0) + 1;
+                    coaches.push({ id: newId, ...coachData });
+                }
+                
+                saveToStorage();
+                closeCoachModal();
+                loadCoaches();
+            }
+        });
+
+        // Athletes Management
+        let currentFilter = 'all';
+
+        function loadAthletes(filter = 'all') {
+            const grid = document.getElementById('athletesGrid');
+            grid.innerHTML = '';
+            
+            let filteredAthletes = athletes;
+            if (filter !== 'all') {
+                filteredAthletes = athletes.filter(athlete => {
+                    // Use stored ageGroup if available, otherwise calculate from birthDate
+                    const athleteAgeGroup = athlete.ageGroup || getAgeGroup(athlete.birthDate);
+                    return athleteAgeGroup === filter;
+                });
+            }
+            
+            if (filteredAthletes.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full text-center py-8">
+                        <i class="fas fa-swimmer text-4xl text-gray-400 mb-4"></i>
+                        <p class="text-gray-500">Tidak ada atlet di kategori ini</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            filteredAthletes.forEach(athlete => {
+                const ageGroup = athlete.ageGroup || getAgeGroup(athlete.birthDate);
+                const age = calculateAge(athlete.birthDate);
+                
+                const card = document.createElement('div');
+                card.className = 'bg-white rounded-lg shadow-md p-6 card-hover';
+                
+                const isAdmin = userRole === 'admin';
+                const editDeleteButtons = isAdmin ? `
+                    <div class="flex space-x-2">
+                        <button onclick="editAthlete(${athlete.id})" class="flex-1 bg-yellow-500 text-white py-1 px-2 rounded text-xs hover:bg-yellow-600 transition duration-200">
+                            Edit
+                        </button>
+                        <button onclick="deleteAthlete(${athlete.id})" class="flex-1 bg-red-500 text-white py-1 px-2 rounded text-xs hover:bg-red-600 transition duration-200">
+                            Hapus
+                        </button>
+                    </div>
+                ` : '';
+                
+                card.innerHTML = `
+                    <div class="text-center">
+                        ${generateAvatar(athlete.name, athlete.photo)}
+                        <h4 class="mt-4 font-semibold text-gray-800">${athlete.name}</h4>
+                        <p class="text-sm text-gray-600">${athlete.level}</p>
+                        <p class="text-xs text-blue-600 font-medium mb-4">${ageGroup} (${age} tahun)</p>
+                        <div class="space-y-2">
+                            <button onclick="viewProfile('athlete', ${athlete.id})" class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-200 text-sm">
+                                Lihat Profil
+                            </button>
+                            ${editDeleteButtons}
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function filterAthletes(filter) {
+            currentFilter = filter;
+            
+            // Update dropdown value if called programmatically
+            const dropdown = document.getElementById('ageGroupFilter');
+            if (dropdown && dropdown.value !== filter) {
+                dropdown.value = filter;
+            }
+            
+            // Load filtered athletes
+            loadAthletes(filter);
+        }
+
+        function showAddAthleteModal() {
+            document.getElementById('athleteModalTitle').textContent = 'Tambah Atlet';
+            document.getElementById('athleteForm').reset();
+            document.getElementById('athleteId').value = '';
+            document.getElementById('athleteModal').classList.remove('hidden');
+        }
+
+        function editAthlete(id) {
+            const athlete = athletes.find(a => a.id === id);
+            if (athlete) {
+                document.getElementById('athleteModalTitle').textContent = 'Edit Atlet';
+                document.getElementById('athleteId').value = athlete.id;
+                document.getElementById('athleteName').value = athlete.name;
+                document.getElementById('athleteBirthDate').value = athlete.birthDate;
+                document.getElementById('athleteGender').value = athlete.gender || '';
+                document.getElementById('athleteAgeGroup').value = athlete.ageGroup || getAgeGroup(athlete.birthDate);
+                document.getElementById('athleteLevel').value = athlete.level;
+                document.getElementById('athleteStatus').value = athlete.status;
+                
+                // Show existing photo if available
+                if (athlete.photo) {
+                    document.getElementById('athletePreviewImg').src = athlete.photo;
+                    document.getElementById('athletePhotoPreview').classList.remove('hidden');
+                } else {
+                    document.getElementById('athletePhotoPreview').classList.add('hidden');
+                }
+                
+                document.getElementById('athleteModal').classList.remove('hidden');
+            }
+        }
+
+        function deleteAthlete(id) {
+            if (confirm('Apakah Anda yakin ingin menghapus atlet ini?')) {
+                athletes = athletes.filter(a => a.id !== id);
+                saveToStorage();
+                loadAthletes(currentFilter);
+                updateStatistics();
+                loadAgeGroupChart();
+            }
+        }
+
+        function closeAthleteModal() {
+            document.getElementById('athleteModal').classList.add('hidden');
+            document.getElementById('athletePhotoPreview').classList.add('hidden');
+            document.getElementById('athletePhoto').value = '';
+        }
+
+        document.getElementById('athleteForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const id = document.getElementById('athleteId').value;
+            const photoFile = document.getElementById('athletePhoto').files[0];
+            
+            const athleteData = {
+                name: document.getElementById('athleteName').value,
+                birthDate: document.getElementById('athleteBirthDate').value,
+                gender: document.getElementById('athleteGender').value,
+                ageGroup: document.getElementById('athleteAgeGroup').value,
+                level: document.getElementById('athleteLevel').value,
+                status: document.getElementById('athleteStatus').value
+            };
+
+            // Handle photo upload
+            if (photoFile) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    athleteData.photo = e.target.result;
+                    saveAthleteData();
+                };
+                reader.readAsDataURL(photoFile);
+            } else {
+                // Keep existing photo if editing and no new photo selected
+                if (id) {
+                    const existingAthlete = athletes.find(a => a.id === parseInt(id));
+                    if (existingAthlete && existingAthlete.photo) {
+                        athleteData.photo = existingAthlete.photo;
+                    }
+                }
+                saveAthleteData();
+            }
+
+            function saveAthleteData() {
+                if (id) {
+                    // Edit existing athlete
+                    const index = athletes.findIndex(a => a.id === parseInt(id));
+                    if (index !== -1) {
+                        athletes[index] = { ...athletes[index], ...athleteData };
+                    }
+                } else {
+                    // Add new athlete
+                    const newId = Math.max(...athletes.map(a => a.id), 0) + 1;
+                    athletes.push({ id: newId, ...athleteData });
+                }
+                
+                saveToStorage();
+                closeAthleteModal();
+                loadAthletes();
+            }
+        });
+
+        // Profile View
+        function viewProfile(type, id) {
+            let person;
+            if (type === 'coach') {
+                person = coaches.find(c => c.id === id);
+            } else {
+                person = athletes.find(a => a.id === id);
+            }
+            
+            if (person) {
+                const age = calculateAge(person.birthDate);
+                const formattedDate = formatDate(person.birthDate);
+                const ageGroup = type === 'athlete' ? (person.ageGroup || getAgeGroup(person.birthDate)) : null;
+                
+                document.getElementById('profileContent').innerHTML = `
+                    <div class="text-center">
+                        ${generateAvatar(person.name, person.photo)}
+                        <h4 class="mt-4 text-xl font-semibold text-gray-800">${person.name}</h4>
+                        <div class="mt-4 space-y-3 text-left">
+                            <div class="flex justify-between">
+                                <span class="font-medium text-gray-600">Tanggal Lahir:</span>
+                                <span class="text-gray-800">${formattedDate}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="font-medium text-gray-600">Usia:</span>
+                                <span class="text-gray-800">${age} tahun</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="font-medium text-gray-600">Jenis Kelamin:</span>
+                                <span class="text-gray-800">${person.gender || 'Tidak diketahui'}</span>
+                            </div>
+                            ${ageGroup ? `
+                            <div class="flex justify-between">
+                                <span class="font-medium text-gray-600">Kelompok Umur:</span>
+                                <span class="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">${ageGroup}</span>
+                            </div>
+                            ` : ''}
+                            <div class="flex justify-between">
+                                <span class="font-medium text-gray-600">Level:</span>
+                                <span class="text-gray-800">${person.level}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="font-medium text-gray-600">Status:</span>
+                                <span class="px-2 py-1 rounded-full text-xs ${person.status === 'Aktif' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${person.status}</span>
+                            </div>
+                        </div>
+                        ${type === 'athlete' ? getAthleteEventHistory(person.name) : ''}
+                    </div>
+                `;
+                document.getElementById('profileModal').classList.remove('hidden');
+            }
+        }
+
+        function closeProfileModal() {
+            document.getElementById('profileModal').classList.add('hidden');
+        }
+
+        // Schedule Management
+        function loadSchedules() {
+            const list = document.getElementById('scheduleList');
+            list.innerHTML = '';
+            
+            schedules.forEach(schedule => {
+                const card = document.createElement('div');
+                card.className = 'bg-white rounded-lg shadow-md p-6';
+                
+                const isAdmin = userRole === 'admin';
+                const editDeleteButtons = isAdmin ? `
+                    <div class="flex space-x-2">
+                        <button onclick="editSchedule(${schedule.id})" class="bg-yellow-500 text-white px-3 py-1 rounded text-sm hover:bg-yellow-600 transition duration-200">
+                            Edit
+                        </button>
+                        <button onclick="deleteSchedule(${schedule.id})" class="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600 transition duration-200">
+                            Hapus
+                        </button>
+                    </div>
+                ` : '';
+                
+                card.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h4 class="text-lg font-semibold text-gray-800">${schedule.day}, ${schedule.time}</h4>
+                            <p class="text-gray-600">Kelompok: ${schedule.group}</p>
+                            <p class="text-gray-600">Pelatih: ${schedule.coach}</p>
+                        </div>
+                        ${editDeleteButtons}
+                    </div>
+                `;
+                list.appendChild(card);
+            });
+        }
+
+        function showAddScheduleModal() {
+            document.getElementById('scheduleModalTitle').textContent = 'Tambah Jadwal';
+            document.getElementById('scheduleForm').reset();
+            document.getElementById('scheduleId').value = '';
+            document.getElementById('scheduleModal').classList.remove('hidden');
+        }
+
+        function editSchedule(id) {
+            const schedule = schedules.find(s => s.id === id);
+            if (schedule) {
+                document.getElementById('scheduleModalTitle').textContent = 'Edit Jadwal';
+                document.getElementById('scheduleId').value = schedule.id;
+                document.getElementById('scheduleDay').value = schedule.day;
+                document.getElementById('scheduleTime').value = schedule.time;
+                document.getElementById('scheduleGroup').value = schedule.group;
+                document.getElementById('scheduleCoach').value = schedule.coach;
+                document.getElementById('scheduleModal').classList.remove('hidden');
+            }
+        }
+
+        function deleteSchedule(id) {
+            if (confirm('Apakah Anda yakin ingin menghapus jadwal ini?')) {
+                schedules = schedules.filter(s => s.id !== id);
+                saveToStorage();
+                loadSchedules();
+                updateStatistics();
+            }
+        }
+
+        function closeScheduleModal() {
+            document.getElementById('scheduleModal').classList.add('hidden');
+        }
+
+        document.getElementById('scheduleForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const id = document.getElementById('scheduleId').value;
+            const scheduleData = {
+                day: document.getElementById('scheduleDay').value,
+                time: document.getElementById('scheduleTime').value,
+                group: document.getElementById('scheduleGroup').value,
+                coach: document.getElementById('scheduleCoach').value
+            };
+            
+            if (id) {
+                // Edit existing schedule
+                const index = schedules.findIndex(s => s.id === parseInt(id));
+                if (index !== -1) {
+                    schedules[index] = { ...schedules[index], ...scheduleData };
+                }
+            } else {
+                // Add new schedule
+                const newId = Math.max(...schedules.map(s => s.id), 0) + 1;
+                schedules.push({ id: newId, ...scheduleData });
+            }
+            
+            saveToStorage();
+            closeScheduleModal();
+            loadSchedules();
+        });
+
+        // Achievements Management
+        function loadAchievements() {
+            const list = document.getElementById('achievementsList');
+            list.innerHTML = '';
+            
+            achievements.forEach(achievement => {
+                const card = document.createElement('div');
+                card.className = 'bg-white rounded-lg shadow-md p-6';
+                
+                const isAdmin = userRole === 'admin';
+                const editDeleteButtons = isAdmin ? `
+                    <div class="flex space-x-2">
+                        <button onclick="editAchievement(${achievement.id})" class="bg-yellow-500 text-white px-3 py-1 rounded text-sm hover:bg-yellow-600 transition duration-200">
+                            Edit
+                        </button>
+                        <button onclick="deleteAchievement(${achievement.id})" class="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600 transition duration-200">
+                            Hapus
+                        </button>
+                    </div>
+                ` : '';
+                
+                card.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h4 class="text-lg font-semibold text-gray-800">${achievement.athlete}</h4>
+                            <p class="text-gray-600">${achievement.competition}</p>
+                            <div class="flex items-center mt-2">
+                                <span class="px-3 py-1 rounded-full text-sm font-medium ${
+                                    achievement.rank === 'Juara 1' ? 'bg-yellow-100 text-yellow-800' :
+                                    achievement.rank === 'Juara 2' ? 'bg-gray-100 text-gray-800' :
+                                    achievement.rank === 'Juara 3' ? 'bg-orange-100 text-orange-800' :
+                                    'bg-blue-100 text-blue-800'
+                                }">${achievement.rank}</span>
+                                <span class="ml-3 text-sm text-gray-500">${formatDate(achievement.date)}</span>
+                            </div>
+                        </div>
+                        ${editDeleteButtons}
+                    </div>
+                `;
+                list.appendChild(card);
+            });
+        }
+
+        function showAddAchievementModal() {
+            document.getElementById('achievementModalTitle').textContent = 'Tambah Prestasi';
+            document.getElementById('achievementForm').reset();
+            document.getElementById('achievementId').value = '';
+            document.getElementById('achievementModal').classList.remove('hidden');
+        }
+
+        function editAchievement(id) {
+            const achievement = achievements.find(a => a.id === id);
+            if (achievement) {
+                document.getElementById('achievementModalTitle').textContent = 'Edit Prestasi';
+                document.getElementById('achievementId').value = achievement.id;
+                document.getElementById('achievementAthlete').value = achievement.athlete;
+                document.getElementById('achievementCompetition').value = achievement.competition;
+                document.getElementById('achievementRank').value = achievement.rank;
+                document.getElementById('achievementDate').value = achievement.date;
+                document.getElementById('achievementModal').classList.remove('hidden');
+            }
+        }
+
+        function deleteAchievement(id) {
+            if (confirm('Apakah Anda yakin ingin menghapus prestasi ini?')) {
+                achievements = achievements.filter(a => a.id !== id);
+                saveToStorage();
+                loadAchievements();
+                updateStatistics();
+                loadRecentAchievements();
+            }
+        }
+
+        function closeAchievementModal() {
+            document.getElementById('achievementModal').classList.add('hidden');
+        }
+
+        document.getElementById('achievementForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const id = document.getElementById('achievementId').value;
+            const achievementData = {
+                athlete: document.getElementById('achievementAthlete').value,
+                competition: document.getElementById('achievementCompetition').value,
+                rank: document.getElementById('achievementRank').value,
+                date: document.getElementById('achievementDate').value
+            };
+            
+            if (id) {
+                // Edit existing achievement
+                const index = achievements.findIndex(a => a.id === parseInt(id));
+                if (index !== -1) {
+                    achievements[index] = { ...achievements[index], ...achievementData };
+                }
+            } else {
+                // Add new achievement
+                const newId = Math.max(...achievements.map(a => a.id), 0) + 1;
+                achievements.push({ id: newId, ...achievementData });
+            }
+            
+            saveToStorage();
+            closeAchievementModal();
+            loadAchievements();
+        });
+
+        // Initialize
+        window.addEventListener('resize', function() {
+            if (window.innerWidth >= 1024) {
+                document.getElementById('sidebar').classList.remove('-translate-x-full');
+            } else {
+                document.getElementById('sidebar').classList.add('-translate-x-full');
+            }
+        });
+
+        // Photo preview functionality
+        document.getElementById('coachPhoto').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('coachPreviewImg').src = e.target.result;
+                    document.getElementById('coachPhotoPreview').classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        document.getElementById('athletePhoto').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('athletePreviewImg').src = e.target.result;
+                    document.getElementById('athletePhotoPreview').classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Event History Management
+        function loadEventHistory() {
+            const list = document.getElementById('eventHistoryList');
+            const athleteFilter = document.getElementById('eventAthleteFilter');
+            const yearFilter = document.getElementById('eventYearFilter');
+            
+            // Populate athlete filter dropdown
+            athleteFilter.innerHTML = '<option value="all">Semua Atlet</option>';
+            const uniqueAthletes = [...new Set(athletes.map(a => a.name))];
+            uniqueAthletes.forEach(athleteName => {
+                athleteFilter.innerHTML += `<option value="${athleteName}">${athleteName}</option>`;
+            });
+            
+            // Populate year filter dropdown automatically from 2020 to current year
+            yearFilter.innerHTML = '<option value="all">Semua Tahun</option>';
+            const currentYear = new Date().getFullYear();
+            const startYear = 2020;
+            
+            // Generate years from current year down to start year
+            for (let year = currentYear; year >= startYear; year--) {
+                yearFilter.innerHTML += `<option value="${year}">${year}</option>`;
+            }
+            
+            // Apply current filters
+            applyEventFilters();
+        }
+
+        function applyEventFilters() {
+            const athleteFilter = document.getElementById('eventAthleteFilter').value;
+            const monthFilter = document.getElementById('eventMonthFilter').value;
+            const yearFilter = document.getElementById('eventYearFilter').value;
+            const list = document.getElementById('eventHistoryList');
+            
+            list.innerHTML = '';
+            
+            let filteredEvents = eventHistory;
+            
+            // Filter by athlete
+            if (athleteFilter !== 'all') {
+                filteredEvents = filteredEvents.filter(event => event.athlete === athleteFilter);
+            }
+            
+            // Filter by month
+            if (monthFilter !== 'all') {
+                filteredEvents = filteredEvents.filter(event => {
+                    const eventMonth = new Date(event.date).getMonth() + 1;
+                    return eventMonth.toString().padStart(2, '0') === monthFilter;
+                });
+            }
+            
+            // Filter by year
+            if (yearFilter !== 'all') {
+                filteredEvents = filteredEvents.filter(event => {
+                    const eventYear = new Date(event.date).getFullYear();
+                    return eventYear.toString() === yearFilter;
+                });
+            }
+            
+            // Sort by date (newest first)
+            filteredEvents.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            if (filteredEvents.length === 0) {
+                list.innerHTML = `
+                    <div class="text-center py-8">
+                        <i class="fas fa-stopwatch text-4xl text-gray-400 mb-4"></i>
+                        <p class="text-gray-500">Tidak ada event history yang sesuai dengan filter</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            filteredEvents.forEach(event => {
+                const card = document.createElement('div');
+                card.className = 'bg-white rounded-lg shadow-md p-6';
+                
+                const isAdmin = userRole === 'admin';
+                const editDeleteButtons = isAdmin ? `
+                    <div class="flex space-x-2">
+                        <button onclick="editEvent(${event.id})" class="bg-yellow-500 text-white px-3 py-1 rounded text-sm hover:bg-yellow-600 transition duration-200">
+                            Edit
+                        </button>
+                        <button onclick="deleteEvent(${event.id})" class="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600 transition duration-200">
+                            Hapus
+                        </button>
+                    </div>
+                ` : '';
+                
+                card.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                            <div class="flex items-center mb-2">
+                                <h4 class="text-lg font-semibold text-gray-800 mr-3">${event.athlete}</h4>
+                                <span class="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">${event.stroke}</span>
+                            </div>
+                            <p class="text-gray-600 mb-1">${event.eventName} (${event.distance}m)</p>
+                            <div class="flex items-center space-x-4">
+                                <span class="text-2xl font-bold text-blue-600">${event.time}</span>
+                                <span class="text-sm text-gray-500">${formatDate(event.date)}</span>
+                            </div>
+                        </div>
+                        ${editDeleteButtons}
+                    </div>
+                `;
+                list.appendChild(card);
+            });
+        }
+
+        function resetEventFilters() {
+            document.getElementById('eventAthleteFilter').value = 'all';
+            document.getElementById('eventMonthFilter').value = 'all';
+            document.getElementById('eventYearFilter').value = 'all';
+            applyEventFilters();
+        }
+
+        function showAddEventModal() {
+            document.getElementById('eventModalTitle').textContent = 'Tambah Event';
+            document.getElementById('eventForm').reset();
+            document.getElementById('eventId').value = '';
+            
+            // Populate athlete dropdown
+            const athleteSelect = document.getElementById('eventAthlete');
+            athleteSelect.innerHTML = '<option value="">Pilih Atlet</option>';
+            athletes.forEach(athlete => {
+                athleteSelect.innerHTML += `<option value="${athlete.name}">${athlete.name}</option>`;
+            });
+            
+            document.getElementById('eventModal').classList.remove('hidden');
+        }
+
+        function editEvent(id) {
+            const event = eventHistory.find(e => e.id === id);
+            if (event) {
+                document.getElementById('eventModalTitle').textContent = 'Edit Event';
+                document.getElementById('eventId').value = event.id;
+                
+                // Populate athlete dropdown
+                const athleteSelect = document.getElementById('eventAthlete');
+                athleteSelect.innerHTML = '<option value="">Pilih Atlet</option>';
+                athletes.forEach(athlete => {
+                    athleteSelect.innerHTML += `<option value="${athlete.name}">${athlete.name}</option>`;
+                });
+                
+                document.getElementById('eventAthlete').value = event.athlete;
+                document.getElementById('eventName').value = event.eventName;
+                document.getElementById('eventStroke').value = event.stroke;
+                document.getElementById('eventDistance').value = event.distance;
+                document.getElementById('eventTime').value = event.time;
+                document.getElementById('eventDate').value = event.date;
+                document.getElementById('eventModal').classList.remove('hidden');
+            }
+        }
+
+        function deleteEvent(id) {
+            if (confirm('Apakah Anda yakin ingin menghapus event ini?')) {
+                eventHistory = eventHistory.filter(e => e.id !== id);
+                saveToStorage();
+                applyEventFilters(); // Refresh the filtered view
+            }
+        }
+
+        function closeEventModal() {
+            document.getElementById('eventModal').classList.add('hidden');
+        }
+
+        document.getElementById('eventForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const id = document.getElementById('eventId').value;
+            const eventData = {
+                athlete: document.getElementById('eventAthlete').value,
+                eventName: document.getElementById('eventName').value,
+                stroke: document.getElementById('eventStroke').value,
+                distance: document.getElementById('eventDistance').value,
+                time: document.getElementById('eventTime').value,
+                date: document.getElementById('eventDate').value
+            };
+            
+            if (id) {
+                // Edit existing event
+                const index = eventHistory.findIndex(e => e.id === parseInt(id));
+                if (index !== -1) {
+                    eventHistory[index] = { ...eventHistory[index], ...eventData };
+                }
+            } else {
+                // Add new event
+                const newId = Math.max(...eventHistory.map(e => e.id), 0) + 1;
+                eventHistory.push({ id: newId, ...eventData });
+            }
+            
+            saveToStorage();
+            closeEventModal();
+            loadEventHistory();
+            // Update dashboard if currently viewing it
+            if (!document.getElementById('dashboardSection').classList.contains('hidden')) {
+                loadDashboard();
+            }
+        });
+
+        function getAthleteEventHistory(athleteName) {
+            const athleteEvents = eventHistory
+                .filter(event => event.athlete === athleteName)
+                .sort((a, b) => new Date(b.date) - new Date(a.date))
+                .slice(0, 3); // Show only latest 3 events
+            
+            if (athleteEvents.length === 0) {
+                return `
+                    <div class="mt-6 pt-4 border-t border-gray-200">
+                        <h5 class="font-medium text-gray-700 mb-2">Event History Terbaru</h5>
+                        <p class="text-sm text-gray-500">Belum ada catatan waktu</p>
+                    </div>
+                `;
+            }
+            
+            let historyHtml = `
+                <div class="mt-6 pt-4 border-t border-gray-200">
+                    <h5 class="font-medium text-gray-700 mb-3">Event History Terbaru</h5>
+                    <div class="space-y-2">
+            `;
+            
+            athleteEvents.forEach(event => {
+                historyHtml += `
+                    <div class="flex justify-between items-center text-sm">
+                        <div>
+                            <span class="font-medium">${event.eventName}</span>
+                            <span class="text-gray-500 ml-2">${formatDate(event.date)}</span>
+                        </div>
+                        <span class="font-bold text-blue-600">${event.time}</span>
+                    </div>
+                `;
+            });
+            
+            historyHtml += `
+                    </div>
+                </div>
+            `;
+            
+            return historyHtml;
+        }
+
+        // Initialize storage and load data
+        initializeStorage();
+
+        // Initialize dashboard on load
+        loadDashboard();
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9722efbe517cce45',t:'MTc1NTcwMzg3NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
